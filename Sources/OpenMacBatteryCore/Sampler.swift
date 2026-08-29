@@ -123,7 +123,7 @@ public final class Sampler {
 
         try db.transaction {
             for pid in pids {
-                guard let id = ProcessInfoReader.identity(pid: pid) else { continue }
+                guard let id = ProcessInfoReader.identity(pid: pid), id.uid == getuid() else { continue }
                 guard let ru = ProcessInfoReader.rusage(pid: pid) else {
                     let err = ProcessInfoReader.lastErrno
                     if err == EPERM { permDenied += 1 }

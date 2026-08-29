@@ -61,6 +61,13 @@ static inline bt_rusage_t bt_proc_rusage(pid_t pid) {
         return out;
     }
 
+    // Only retry V4 when V6 is unavailable. Retrying V4 for EPERM and
+    // transient process races doubles the syscall cost of every skipped PID.
+    int first_error = errno;
+    if (first_error != EINVAL) {
+        return out;
+    }
+
     // V6 desteklenmiyorsa V4 ile dene (energy field'ları yok, billed_energy=0 kalır)
     struct rusage_info_v4 ru4;
     ret = proc_pid_rusage(pid, RUSAGE_INFO_V4, (rusage_info_t *)&ru4);

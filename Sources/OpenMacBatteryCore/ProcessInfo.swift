@@ -35,10 +35,9 @@ public enum ProcessInfoReader {
             bt_listallpids(ptr.baseAddress, Int32(cap))
         }
         guard written > 0 else { return [] }
-        // proc_listallpids dönüş değeri yazılan toplam byte değil, yazılan PID sayısı (Apple docs).
-        // Buffer'ı written'a göre kırp.
-        let n = Int(written) / MemoryLayout<pid_t>.size
-        let actual = min(n > 0 ? n : Int(written), cap)
+        // proc_listallpids returns the number of PIDs written, not bytes.
+        // The C shim already converts the Swift capacity to bytes.
+        let actual = min(Int(written), cap)
         return Array(buffer.prefix(actual)).filter { $0 > 0 }
     }
 

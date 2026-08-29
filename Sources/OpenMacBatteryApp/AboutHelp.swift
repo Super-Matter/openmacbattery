@@ -57,7 +57,7 @@ struct HelpView: View {
                 }
 
                 section(title: "Joules vs scores?") {
-                    Text("Apple's `ri_billed_energy` counter is undocumented. To display real joule values, run a one-time calibration:")
+                    Text("Apple's `ri_billed_energy` counter is undocumented. Calibration estimates processor/package joules; it is not a battery-meter calibration:")
                         .foregroundStyle(.secondary)
                     Text("openmacbattery calibrate --duration 300")
                         .font(.system(.caption, design: .monospaced))

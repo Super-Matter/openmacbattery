@@ -22,7 +22,7 @@ struct CalibrateCommand: ParsableCommand {
 
         if show {
             if let f = db.meta(key: "energy_unit_factor") {
-                print("Current factor: \(f) J / raw_unit")
+                print("Current estimated package factor: \(f) J / raw_unit")
                 if let when = db.meta(key: "energy_unit_calibrated_at") {
                     print("Calibrated at:  \(when)")
                 }
@@ -50,9 +50,9 @@ struct CalibrateCommand: ParsableCommand {
         print("Calibration complete.")
         print("  Duration:        \(String(format: "%.1f", result.durationSec))s")
         print("  Plist samples:   \(result.plistSampleCount)")
-        print("  Total energy:    \(String(format: "%.2f J", result.totalJoules))")
-        print("  Total raw delta: \(result.totalRawDelta)")
-        print("  Factor:          \(result.factor) J / raw_unit")
+        print("  Estimated processor energy: \(String(format: "%.2f J", result.totalJoules))")
+        print("  Total raw delta:            \(result.totalRawDelta)")
+        print("  Factor (estimated package): \(result.factor) J / raw_unit")
         print("  Stored at:       \(when)")
     }
 }

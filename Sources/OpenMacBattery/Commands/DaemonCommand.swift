@@ -126,7 +126,7 @@ struct DaemonCommand: ParsableCommand {
                 print("    →  \(fmt.string(from: Date(timeIntervalSince1970: TimeInterval(newest))))")
             }
             if let f = s.calibrationFactor {
-                print("Energy unit factor (J/raw): \(f)")
+                print("Energy unit factor (estimated package J/raw): \(f)")
             } else {
                 print("Energy unit factor: NOT calibrated (showing raw scores)")
             }

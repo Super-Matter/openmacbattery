@@ -295,7 +295,7 @@ public final class Reporter {
             MIN(timestamp), MAX(timestamp),
             (SELECT battery_percent FROM samples WHERE timestamp >= ? AND is_on_battery = 1 AND battery_percent IS NOT NULL ORDER BY timestamp ASC LIMIT 1),
             (SELECT battery_percent FROM samples WHERE timestamp <= ? AND is_on_battery = 1 AND battery_percent IS NOT NULL ORDER BY timestamp DESC LIMIT 1),
-            COUNT(*)
+            COUNT(DISTINCT timestamp)
         FROM samples
         WHERE timestamp BETWEEN ? AND ? AND is_on_battery = 1 AND battery_percent IS NOT NULL;
         """
@@ -362,14 +362,37 @@ public final class Reporter {
         try s2.bind(1, range.from); try s2.bind(2, range.to)
         if s2.step(), !s2.isNull(0) { last = s2.int(0) }
 
-        // Pildeyken / AC süresi (her sample 60sn varsay; aslında interval değişmiş olabilir)
+        // Use timestamp gaps rather than assuming every tick is 60s. The
+        // sampler can throttle to 120s, and a long gap may include sleep.
         let durSql = """
+        WITH distinct_samples AS (
+            SELECT timestamp, MAX(is_on_battery) AS is_on_battery
+            FROM samples
+            WHERE timestamp BETWEEN ? AND ?
+            GROUP BY timestamp
+        ), sample_times AS (
+            SELECT timestamp, is_on_battery,
+                   LEAD(timestamp) OVER (ORDER BY timestamp) AS next_timestamp
+            FROM distinct_samples
+        )
         SELECT
-            COALESCE(SUM(CASE WHEN is_on_battery = 1 THEN 1 ELSE 0 END), 0),
-            COALESCE(SUM(CASE WHEN is_on_battery = 0 THEN 1 ELSE 0 END), 0)
-        FROM (SELECT DISTINCT timestamp, MAX(is_on_battery) AS is_on_battery
-              FROM samples WHERE timestamp BETWEEN ? AND ?
-              GROUP BY timestamp);
+            COALESCE(SUM(CASE WHEN is_on_battery = 1 THEN
+                CASE
+                    WHEN next_timestamp IS NULL THEN 60
+                    WHEN next_timestamp - timestamp > 300 THEN 300
+                    WHEN next_timestamp > timestamp THEN next_timestamp - timestamp
+                    ELSE 0
+                END
+            ELSE 0 END), 0),
+            COALESCE(SUM(CASE WHEN is_on_battery = 0 THEN
+                CASE
+                    WHEN next_timestamp IS NULL THEN 60
+                    WHEN next_timestamp - timestamp > 300 THEN 300
+                    WHEN next_timestamp > timestamp THEN next_timestamp - timestamp
+                    ELSE 0
+                END
+            ELSE 0 END), 0)
+        FROM sample_times;
         """
         var onBattSec: Int64 = 0; var onAcSec: Int64 = 0
         let s3 = try db.prepare(durSql); defer { s3.finalize() }

@@ -19,7 +19,7 @@ struct OnboardingView: View {
                 BulletRow(icon: "clock", text: "Checks every running app on your Mac once per minute.")
                 BulletRow(icon: "battery.75percent", text: "Tells you which app drained your battery — looking back, not just now.")
                 BulletRow(icon: "lock.shield", text: "Your data stays on this Mac. Nothing is sent over the network.")
-                BulletRow(icon: "leaf", text: "Uses almost no battery itself (~1-2 joules per hour).")
+                BulletRow(icon: "leaf", text: "Uses a low-overhead background sampler.")
             }
             .padding(.horizontal, 16)
 

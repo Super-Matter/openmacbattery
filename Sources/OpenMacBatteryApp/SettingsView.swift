@@ -55,7 +55,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Calibration")
                         .font(.headline)
-                    Text("To convert to real joules, run a one-time 5-minute comparison against Apple's powermetrics. Requires sudo, run from Terminal:")
+                    Text("To estimate processor/package joules, run a one-time 5-minute comparison against Apple's powermetrics. This is not a battery-meter calibration. Requires sudo, run from Terminal:")
                         .font(.caption).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text("openmacbattery calibrate --duration 300")

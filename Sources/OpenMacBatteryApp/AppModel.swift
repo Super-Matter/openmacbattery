@@ -172,16 +172,8 @@ final class AppModel: ObservableObject {
         } else {
             self.liveAppWatts = [:]
         }
-        // Pil snapshot'ı + son 1 saatlik gerçek ortalama tüketim
-        let snap = PowerSourceReader.batterySnapshot()
-        self.batterySnapshot = snap
-        if let s = snap, s.fullWh > 0 {
-            if let db = try? Database(path: Database.defaultPath()) {
-                let reporter = Reporter(db: db)
-                let avg = try? reporter.averageBatteryWatts(rangeSec: 3600, fullWh: s.fullWh)
-                self.avgWatts1h = avg?.watts
-            }
-        }
+        // Keep the 15-second path limited to the live IOKit readings. The
+        // historical average is refreshed with the normal 60-second reload.
         self.lastLiveRefresh = Date()
     }
 
@@ -209,6 +201,11 @@ final class AppModel: ObservableObject {
                               end: Date(timeIntervalSince1970: TimeInterval($0.end)))
             }
             let bs = try reporter.batterySummary(range: r)
+            if let snap = batterySnapshot, snap.fullWh > 0 {
+                self.avgWatts1h = (try? reporter.averageBatteryWatts(rangeSec: 3600, fullWh: snap.fullWh))?.watts
+            } else {
+                self.avgWatts1h = nil
+            }
 
             // Sparkline'lar (sidebar mini grafik)
             let sparkBuckets = 32

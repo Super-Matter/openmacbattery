@@ -1,3 +1,4 @@
+#if canImport(XCTest)
 import XCTest
 @testable import OpenMacBatteryCore
 
@@ -46,4 +47,23 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(EnergyFormatter.format(rawEnergy: 1_000_000_000, factor: 1.0).contains("kJ") ||
                       EnergyFormatter.format(rawEnergy: 1_000_000_000, factor: 1.0).contains("J"))
     }
+
+    func testCalibratorParsesAppleSiliconPlist() throws {
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+          <key>elapsed_ns</key><integer>2000000000</integer>
+          <key>processor</key><dict>
+            <key>clusters</key><array><dict>
+              <key>combined_power</key><real>1500</real>
+            </dict></array>
+          </dict>
+        </dict></plist>
+        """
+        let samples = try Calibrator.parsePlistStream(data: Data(xml.utf8) + Data([0]))
+        XCTAssertEqual(samples.count, 1)
+        XCTAssertEqual(Calibrator.packageEnergy(in: samples[0]) ?? 0, 3.0, accuracy: 0.001)
+    }
 }
+#endif

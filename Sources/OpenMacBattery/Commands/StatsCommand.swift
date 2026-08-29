@@ -21,7 +21,7 @@ struct StatsCommand: ParsableCommand {
             print("Span:      \(String(format: "%.1f hours", span))")
         }
         if let f = s.calibrationFactor {
-            print("Calibration: factor = \(f) J/raw")
+            print("Calibration: estimated package factor = \(f) J/raw")
         } else {
             print("Calibration: NOT calibrated — `openmacbattery calibrate` ile faktör çıkar")
         }
