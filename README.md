@@ -5,7 +5,7 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](LICENSE)
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-orange.svg)](#requirements)
 [![Apple Silicon](https://img.shields.io/badge/Apple%20Silicon-native-success.svg)](#requirements)
-[![Languages: 8](https://img.shields.io/badge/i18n-8%20languages-green.svg)](Sources/OpenMacBatteryApp/Resources)
+[![Languages: 9](https://img.shields.io/badge/i18n-9%20languages-green.svg)](Sources/OpenMacBatteryApp/Resources)
 
 > Activity Monitor only knows the present moment. macOS's built-in Battery panel only shows the last 12 hours.
 > **OpenMacBattery remembers the past 30 days, per app.**
@@ -21,7 +21,7 @@ Asks the question: **"My battery dropped 40% between 02:00 and 08:00 — which a
 - Shows live system wattage, per-app share, battery life estimate, sleep periods.
 - Right-click any app → quit / force-quit / show in Activity Monitor.
 - Compares current period vs previous (anomaly detection).
-- Available in 8 languages.
+- Available in 9 languages.
 
 ## About this project
 
@@ -83,10 +83,10 @@ The SQLite database uses WAL mode + `auto_vacuum=INCREMENTAL`. Hourly aggregates
 
 ## Honest caveats
 
-- **`ri_billed_energy` is not documented to be joules.** It's an Apple internal counter; we expose the raw value and apply an empirical calibration if you run `openmacbattery calibrate --duration 300` (5-minute comparison against `powermetrics`, requires `sudo`). Without calibration the UI uses percentages and level badges (relative comparisons are always correct).
+- **`ri_billed_energy` is not documented to be joules.** It's an Apple internal counter; calibration provides an estimated processor/package-energy factor, not a battery meter. Without calibration the UI uses percentages and level badges (relative comparisons are always correct).
 - **System daemons may be invisible.** `proc_pid_rusage` returns `EPERM` for processes you don't own (kernel_task, WindowServer, root daemons). On a single-user Mac, the gap is small.
 - **Sub-60 s processes are missed** — if a process lives less than one sample interval, it never appears.
-- **Self-consumption: ~1-2 J/hour.** Verified empirically — well under the 20 J/hour design target.
+- **Self-consumption is not measured automatically yet.** The sampler is designed to stay below the 20 J/hour target; measure it separately with `powermetrics` before making a device-specific claim.
 
 ## CLI usage
 
@@ -111,10 +111,10 @@ openmacbattery daemon status
 
 ## Languages
 
-UI is localized in **8 languages**. Native-speaker reviews welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+UI is localized in **9 languages**. Native-speaker reviews welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 | Code | Language |
-|------|----------|
+| ------ | ---------- |
 | en | English |
 | tr | Türkçe |
 | zh-Hans | 简体中文 |
@@ -123,6 +123,7 @@ UI is localized in **8 languages**. Native-speaker reviews welcome — see [CONT
 | fr | Français |
 | ja | 日本語 |
 | pt-BR | Português (Brasil) |
+| ru | Русский |
 
 The app picks up your system language automatically. Switch manually via **Apple menu → Language**.
 
@@ -144,16 +145,17 @@ rm -f "$HOME/Library/Logs/openmacbattery.log" \
 ## Troubleshooting
 
 | Problem | Fix |
-|---------|-----|
+| --------- | ----- |
 | **"App can't be opened, unidentified developer"** on first launch | Right-click the `.app` → **Open** → **Open**. macOS remembers this for next time. Standard for ad-hoc signed apps. |
 | **Sidebar empty after install** | Daemon needs ≥ 2 minutes to compute the first deltas. Check with `openmacbattery daemon status`. |
 | **No data accumulating** | Open **Settings** in the app and confirm *Background tracking* is **On**. If off, toggle it. |
 | **GUI looks stale** | Click the refresh-ring in the toolbar (top right) or press ⌘R. Live wattage updates every 15 s; full reload every 60 s. |
-| **Energy values look strange** | They are uncalibrated by default. Run `openmacbattery calibrate --duration 300` (requires `sudo`) for joule estimates. Without calibration, percentages still rank correctly. |
+| **Energy values look strange** | They are uncalibrated by default. Run `openmacbattery calibrate --duration 300` (requires `sudo`) for estimated processor/package joules. Without calibration, percentages still rank correctly. |
 | **Can't quit a system service from the right-click menu** | By design — system services (root-owned, sandboxed Apple daemons) can't be terminated by user-level processes. Use Activity Monitor with admin privileges if you really need to. |
 | **Reset everything** | `openmacbattery reset --confirm` deletes the database and starts fresh. |
 
 Logs:
+
 - `~/Library/Logs/openmacbattery.log` — sampler heartbeat
 - `~/Library/Logs/openmacbattery.error.log` — errors and lifecycle events
 
@@ -168,7 +170,7 @@ A few specific things to know before installing:
 - **The .app is ad-hoc signed**, not notarized by Apple. On first launch macOS will warn you ("unidentified developer"); right-click → Open → Open to bypass. This is normal for indie open-source apps.
 - The installer adds a **user-level LaunchAgent** at `~/Library/LaunchAgents/com.openmacbattery.plist` so the sampler runs in the background. No `sudo` is required and no system-level changes are made — you can remove it any time with `openmacbattery daemon uninstall`.
 - The **force-quit** feature uses `NSRunningApplication.forceTerminate()`. Like Activity Monitor's Force Quit, it can cause unsaved-changes loss in target apps. A confirmation dialog is shown for that reason.
-- **Energy values are estimates**, not authoritative measurements. Apple's `ri_billed_energy` counter is undocumented; we apply optional empirical calibration but expect ±10–20 % error. Use the percentages and rankings, not absolute joule numbers, for decisions.
+- **Energy values are estimates**, not authoritative measurements. Apple's `ri_billed_energy` counter is undocumented; calibration estimates processor/package energy and may vary by Mac model and workload. Use the percentages and rankings, not absolute joule numbers, for decisions.
 - The database (`~/Library/Application Support/OpenMacBattery/data.db`) contains a record of which apps you ran and when — **don't share it publicly** without redacting. Logs (`~/Library/Logs/openmacbattery.log`) are similar.
 - This is a **personal project**, not a commercial product. Issues and pull requests are welcome but there's no SLA or guaranteed response time.
 
