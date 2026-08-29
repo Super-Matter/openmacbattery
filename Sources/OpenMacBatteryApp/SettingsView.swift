@@ -52,16 +52,6 @@ struct SettingsView: View {
             }
 
             Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Energy measurement")
-                        .font(.headline)
-                    Text("On Apple Silicon, OpenMacBattery uses Apple's native per-process energy counter in nanojoules. No sudo calibration is needed.")
-                        .font(.caption).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
-            Section {
                 Button(role: .destructive) {
                     DaemonInstaller.uninstall()
                     daemonRunning = false
@@ -74,7 +64,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 520, height: 480)
+        .frame(width: 520, height: 400)
         .onAppear { daemonRunning = DaemonInstaller.isRunning() }
     }
 

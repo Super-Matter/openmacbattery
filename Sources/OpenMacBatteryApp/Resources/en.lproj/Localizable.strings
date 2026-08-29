@@ -50,6 +50,7 @@
 "Charging now (~%@ W in)" = "Charging now (~%@ W in)";
 "Battery charging: ~%@ W" = "Battery charging: ~%@ W";
 "Drawing now: %@ watts" = "Drawing now: %@ watts";
+"Total draw: %@ W" = "Total draw: %@ W";
 "Adapter: %d W" = "Adapter: %d W";
 "Adapter" = "Adapter";
 "Display (estimated): %.1f W" = "Display (estimated): %.1f W";

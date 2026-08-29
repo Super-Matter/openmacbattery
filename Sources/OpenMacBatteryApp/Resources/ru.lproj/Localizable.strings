@@ -50,6 +50,7 @@
 "Charging now (~%@ W in)" = "Заряжается (~%@ Вт)";
 "Battery charging: ~%@ W" = "Зарядка батареи: примерно %@ Вт";
 "Drawing now: %@ watts" = "Текущее потребление: %@ Вт";
+"Total draw: %@ W" = "Общее потребление: %@ Вт";
 "Display (estimated): %.1f W" = "Экран (оценка): %.1f Вт";
 "Brightness: %d%%" = "Яркость: %d%%";
 "Adapter: %d W" = "Адаптер: %d Вт";

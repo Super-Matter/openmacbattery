@@ -482,7 +482,7 @@ struct LiveWattCard: View {
         if r.isCharging {
             return String(format: NSLocalizedString("Battery charging: ~%@ W", comment: ""), watts)
         }
-        return String(format: NSLocalizedString("Drawing now: %@ watts", comment: ""), watts)
+        return String(format: NSLocalizedString("Total draw: %@ W", comment: ""), watts)
     }
     private var subtext: String {
         guard let r = model.liveWatts else { return "" }
