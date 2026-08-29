@@ -131,6 +131,8 @@ final class AppModel: ObservableObject {
     @Published var anomalies: [String: AppAnomaly] = [:]
     @Published var liveWatts: LivePowerReading? = nil
     @Published var liveAppWatts: [String: Double] = [:]   // app id → estimated W
+    @Published var displayPowerWatts: Double? = nil
+    @Published var displayBrightnessPercent: Int? = nil
     @Published var batterySnapshot: BatterySnapshot? = nil
     @Published var avgWatts1h: Double? = nil              // son 1 saatlik ortalama gerçek W
     @Published var stats = DBStats()
@@ -161,7 +163,11 @@ final class AppModel: ObservableObject {
     /// mevcut `apps` state'indeki oranları kullanıyoruz. Sıfır wakeup, sıfır I/O.
     func refreshLiveWatts() {
         let reading = PowerSourceReader.liveWatts()
+        let display = PowerSourceReader.displayPowerEstimate()
         self.liveWatts = reading
+        self.displayPowerWatts = display?.watts
+        self.displayBrightnessPercent = display?.brightness.map { Int(($0 * 100).rounded()) }
+        self.batterySnapshot = PowerSourceReader.batterySnapshot()
         if let r = reading, r.watts > 0.1, totalUserEnergy > 0 {
             var dist: [String: Double] = [:]
             for app in apps where !app.isSystem {

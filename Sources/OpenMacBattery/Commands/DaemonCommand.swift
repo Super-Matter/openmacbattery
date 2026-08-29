@@ -126,9 +126,9 @@ struct DaemonCommand: ParsableCommand {
                 print("    →  \(fmt.string(from: Date(timeIntervalSince1970: TimeInterval(newest))))")
             }
             if let f = s.calibrationFactor {
-                print("Energy unit factor (estimated package J/raw): \(f)")
+                print("Energy: native process counter (\(f) J/nJ)")
             } else {
-                print("Energy unit factor: NOT calibrated (showing raw scores)")
+                print("Energy: unavailable (no native process energy samples yet)")
             }
 
             // launchctl print

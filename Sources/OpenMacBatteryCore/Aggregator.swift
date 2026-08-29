@@ -23,7 +23,7 @@ public final class Aggregator {
             (timestamp / 3600) * 3600 AS hour_epoch,
             COALESCE(bundle_id, exec_path, 'unknown') AS bkey,
             MAX(COALESCE(display_name, bundle_id, 'unknown')) AS dname,
-            COALESCE(SUM(energy_billed_raw), 0),
+            COALESCE(SUM(energy_nj), 0),
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0),
             COALESCE(SUM(pkg_idle_wakeups + interrupt_wakeups), 0),
             COUNT(*),
@@ -31,6 +31,7 @@ public final class Aggregator {
             SUM(CASE WHEN is_on_battery = 1 THEN 60 ELSE 0 END)
         FROM samples
         WHERE timestamp >= ? AND timestamp < ?
+          AND energy_nj IS NOT NULL
         GROUP BY hour_epoch, bkey;
         """
         let stmt = try db.prepare(sql)

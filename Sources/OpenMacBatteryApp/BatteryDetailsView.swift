@@ -36,6 +36,9 @@ struct BatteryDetailsView: View {
                     row("Battery Temperature", String(format: "%.1f °C", s.temperatureC))
                     row("Voltage", String(format: "%.2f V", Double(s.voltage_mV)/1000))
                     row(dischargeLabel(s), dischargeValue(s))
+                    if let adapterWatts = s.adapterWatts {
+                        row("Adapter", "\(adapterWatts) W")
+                    }
                     row("Full at", String(format: "%.1f Wh", s.fullWh))
                     row("Energy now", String(format: "%.1f Wh", s.remainingWh))
                     row("Low Power Mode", s.lowPowerModeEnabled ? "Enabled" : "Disabled")

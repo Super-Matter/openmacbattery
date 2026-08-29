@@ -1,0 +1,211 @@
+/* Energy levels */
+"High" = "Высокий";
+"Medium" = "Средний";
+"Low" = "Низкий";
+"Minimal" = "Минимальный";
+
+/* Time ranges */
+"Last hour" = "За последний час";
+"Last 6 hours" = "За последние 6 часов";
+"Today" = "Сегодня";
+"This week" = "За эту неделю";
+"This month" = "За этот месяц";
+
+/* Toolbar */
+"Range" = "Период";
+"On battery only" = "Только от батареи";
+"All measurements" = "Все измерения";
+"Showing measurements taken while on battery — click to include all" = "Показаны измерения при работе от батареи — нажмите, чтобы включить все";
+"Showing all measurements — click to filter to battery only" = "Показаны все измерения — нажмите, чтобы оставить только работу от батареи";
+"Show system services" = "Показывать системные службы";
+"Settings…" = "Настройки…";
+"Display options and settings" = "Параметры отображения и настройки";
+"Battery details (⌥⌘B)" = "Сведения о батарее (⌥⌘B)";
+
+/* Sidebar */
+"%lld apps" = "%lld приложений";
+"Collecting data" = "Сбор данных";
+"OpenMacBattery is monitoring your apps in the background. First measurements will arrive within 1-2 minutes." = "OpenMacBattery отслеживает приложения в фоновом режиме. Первые измерения появятся через 1–2 минуты.";
+"%lld samples so far" = "Собрано образцов: %lld";
+"Last sample %@" = "Последний образец: %@";
+"No measurements yet" = "Измерений пока нет";
+"refreshed %@" = "обновлено %@";
+"system" = "система";
+
+/* Context menu */
+"Quit %@" = "Завершить %@";
+"Force Quit" = "Завершить принудительно";
+"System services cannot be quit from here" = "Системные службы нельзя завершить отсюда";
+"No running instance found" = "Запущенный экземпляр не найден";
+"Open in Activity Monitor" = "Открыть в Activity Monitor";
+"Show in Finder" = "Показать в Finder";
+"Force Quit %@?" = "Завершить %@ принудительно?";
+"Cancel" = "Отмена";
+"Unsaved changes may be lost." = "Несохранённые изменения могут быть потеряны.";
+
+/* Anomaly */
+"%@ is consuming %@ battery" = "%@ потребляет %@ батареи";
+
+/* Live watts card */
+"Charging now (~%@ W in)" = "Заряжается (~%@ Вт)";
+"Battery charging: ~%@ W" = "Зарядка батареи: примерно %@ Вт";
+"Drawing now: %@ watts" = "Текущее потребление: %@ Вт";
+"Display (estimated): %.1f W" = "Экран (оценка): %.1f Вт";
+"Brightness: %d%%" = "Яркость: %d%%";
+"Adapter: %d W" = "Адаптер: %d Вт";
+"Adapter" = "Адаптер";
+
+/* Battery life card */
+"%lld%% · charging — full in %@" = "%lld%% · зарядка — до полного заряда: %@";
+"%lld%% · charging" = "%lld%% · заряжается";
+"%lld%% · plugged in (not charging)" = "%lld%% · подключено к сети (не заряжается)";
+"%lld%% · ~%@ of battery left" = "%lld%% · осталось примерно %@";
+"%lld%% · on battery" = "%lld%% · работа от батареи";
+"Last hour avg: %.1f W" = "Среднее потребление за последний час: %.1f Вт";
+"macOS estimate: %@" = "Оценка macOS: %@";
+"Capacity" = "Ёмкость";
+"Health" = "Состояние";
+"Cycles" = "Циклы";
+"%d h %d min" = "%d ч %d мин";
+"%d min" = "%d мин";
+/* ------------------------------- остановился тут */
+/* Hero card */
+"%@: battery dropped %lld%% — mainly %@ (%lld%%)" = "%1$@: заряд батареи снизился на %2$lld%% — в основном из-за %3$@ (%4$lld%%)";
+"%@: battery dropped %lld%%" = "%1$@: заряд батареи снизился на %2$lld%%";
+"%@: plugged in the whole time — no battery use" = "%1$@: всё время от сети — батарея не использовалась";
+"%@: top consumer was %@ (%lld%%)" = "%1$@: больше всего потребляло приложение %2$@ (%3$lld%%)";
+"%@: not enough data yet" = "%1$@: пока недостаточно данных";
+"on battery for %@" = "от батареи: %@";
+"plugged in for %@" = "от сети: %@";
+"asleep for %@" = "в режиме сна: %@";
+"%dh %dm" = "%1$d ч %2$d мин";
+"%dm" = "%d мин";
+"battery %lld%% → %lld%%" = "батарея: %1$lld%% → %2$lld%%";
+
+/* Compare card */
+"Compared to the previous %@" = "По сравнению с предыдущим периодом %@";
+"Need a bit more data to compare with previous period" = "Нужно немного больше данных для сравнения с предыдущим периодом";
+"%lld%% less battery used than the previous %@" = "На %1$lld%% меньше расход батареи, чем за предыдущий %@";
+"%lld%% more battery used than the previous %@" = "На %1$lld%% больше расход батареи, чем за предыдущий %@";
+"Similar to the previous %@ (%lld%% difference)" = "Похоже на предыдущий %@ (разница %2$lld%%)";
+
+/* Tip card */
+"You're on battery — %@ is using %lld%% of your battery load" = "Вы работаете от батареи — на %@ приходится %2$lld%% нагрузки батареи";
+"If it doesn't need to run in the background while on battery, consider quitting it." = "Если приложению не нужно работать в фоне от батареи, рассмотрите возможность его завершения.";
+
+/* Narrative card */
+"%@ was active for %lld hours %lld minutes" = "%1$@ работало %2$lld ч %3$lld мин";
+"%@ was active for %lld minutes" = "%1$@ работало %2$lld мин";
+"Peak hour: around %@" = "Пиковая активность: около %@";
+
+/* Empty state */
+"OpenMacBattery just started. The daemon is checking all apps every minute in the background — charts will fill in within a few minutes." = "OpenMacBattery только что запущен. Демон проверяет все приложения каждую минуту в фоновом режиме — графики заполнятся через несколько минут.";
+"Nothing to show in this range" = "В этом периоде нечего показывать";
+"Try a different time range from the toolbar." = "Выберите другой период на панели инструментов.";
+"System" = "Система";
+
+/* Summary cards */
+"Battery share" = "Доля расхода батареи";
+"CPU time" = "Время ЦП";
+"Wakeups" = "Пробуждения";
+
+/* Charts */
+"Consumption over time" = "Потребление со временем";
+"No data in this range." = "Нет данных за этот период.";
+"Battery level" = "Уровень заряда";
+"No battery readings." = "Нет показаний батареи.";
+"asleep" = "сон";
+"on battery" = "от батареи";
+"plugged in" = "от сети";
+"Top consumers" = "Основные потребители";
+"No data." = "Нет данных.";
+
+/* Refresh ring */
+"Live watts · next update in %ds · click to refresh now" = "Текущая мощность · обновление через %d с · нажмите для обновления";
+
+/* Battery details popover */
+"Battery Details" = "Сведения о батарее";
+"Full Charge Capacity" = "Ёмкость при полном заряде";
+"Design Capacity" = "Расчётная ёмкость";
+"Charge Cycles" = "Циклы зарядки";
+"Manufacture Date" = "Дата производства";
+"Battery Temperature" = "Температура батареи";
+"Voltage" = "Напряжение";
+"Charging current" = "Ток зарядки";
+"Drawing" = "Потребление";
+"Discharging with" = "Разрядка:";
+"Full at" = "Полный заряд";
+"Energy now" = "Текущая энергия";
+"Low Power Mode" = "Режим энергосбережения";
+"Enabled" = "Включён";
+"Disabled" = "Выключен";
+"macOS estimate" = "Оценка macOS";
+"Serial" = "Серийный номер";
+"Could not read battery information." = "Не удалось прочитать сведения о батарее.";
+"Refreshes every 15 seconds" = "Обновляется каждые 15 секунд";
+"Refresh now" = "Обновить";
+" (good)" = " (хорошее)";
+" (fair)" = " (удовлетворительное)";
+" (poor)" = " (плохое)";
+
+/* About + Help */
+"Per-app battery & energy tracker for macOS.\nFind out who's draining your battery — looking back, not just right now.\n\nData stays on this Mac. Nothing is sent over the network." = "Трекер батареи и энергопотребления приложений для macOS.\nУзнайте, какое приложение разряжает батарею — не только сейчас, но и за прошлый период.\n\nДанные остаются на этом Mac. Ничего не отправляется по сети.";
+"© 2026 — open source, free for personal use" = "© 2026 — открытый исходный код, бесплатно для личного использования";
+"OpenMacBattery Help" = "Справка OpenMacBattery";
+"OpenMacBattery Yardımı" = "Справка OpenMacBattery";
+"Tells you what's draining your battery and which app is responsible — looking back, not just right now. Activity Monitor only knows the present moment; OpenMacBattery remembers the past." = "Показывает, что разряжает батарею и какое приложение отвечает за это — не только сейчас, но и за прошлый период. Мониторинг системы показывает только текущий момент; OpenMacBattery хранит историю.";
+"Quick Start" = "Быстрый старт";
+"Quitting an app" = "Завершение приложения";
+"Comparisons and warnings" = "Сравнения и предупреждения";
+"Joules vs scores?" = "Джоули или баллы?";
+"Apple's `ri_energy_nj` counter reports process energy in nanojoules. It is a processor/task estimate, not a battery-meter calibration:" = "Счётчик Apple `ri_energy_nj` показывает энергопотребление процесса в наноджоулях. Это оценка энергии процессора/задачи, а не калибровка измерителя батареи:";
+"Energy values come from Apple's native process counter and are processor/task estimates, not battery-meter readings." = "Значения энергопотребления берутся из встроенного счётчика процессов Apple и являются оценкой энергии процессора/задачи, а не показаниями измерителя батареи.";
+"Apple's `ri_billed_energy` counter is undocumented. Calibration estimates processor/package joules; it is not a battery-meter calibration:" = "Счётчик Apple `ri_billed_energy` не документирован. Калибровка оценивает энергию процессора/пакета в джоулях; это не калибровка измерителя батареи:";
+"Where is the data?" = "Где находятся данные?";
+"Troubleshooting" = "Устранение неполадок";
+"About OpenMacBattery" = "Об OpenMacBattery";
+"Battery Details…" = "Сведения о батарее…";
+"Refresh" = "Обновить";
+
+/* Settings */
+"Background tracking" = "Фоновый сбор данных";
+"On — apps are sampled every minute." = "Вкл. — приложения проверяются каждую минуту.";
+"Off — no new data being collected." = "Выкл. — новые данные не собираются.";
+"Tracking" = "Отслеживание";
+"Open log (Console.app)" = "Открыть журнал (Console.app)";
+"Open error log" = "Открыть журнал ошибок";
+"Open data folder" = "Открыть папку с данными";
+"Diagnostics" = "Диагностика";
+"Energy measurement" = "Измерение энергии";
+"On Apple Silicon, OpenMacBattery uses Apple's native per-process energy counter in nanojoules. No sudo calibration is needed." = "На Apple Silicon OpenMacBattery использует встроенный счётчик энергопотребления процессов Apple в наноджоулях. Калибровка с sudo не требуется.";
+"To estimate processor/package joules, run a one-time 5-minute comparison against Apple's powermetrics. This is not a battery-meter calibration. Requires sudo, run from Terminal:" = "Чтобы оценить энергию процессора/пакета в джоулях, один раз выполните пятиминутное сравнение с powermetrics от Apple. Это не калибровка измерителя батареи. Требуется sudo; запустите из Терминала:";
+"Copy command" = "Копировать команду";
+"Remove background tracking entirely" = "Полностью отключить фоновый сбор данных";
+"Advanced" = "Дополнительно";
+"Background tracking removed." = "Фоновый сбор данных удалён.";
+"Enabled." = "Включено.";
+"Disabled." = "Выключено.";
+"Error" = "Ошибка";
+
+/* Onboarding */
+"Welcome to OpenMacBattery" = "Добро пожаловать в OpenMacBattery";
+"Checks every running app on your Mac once per minute." = "Проверяет все запущенные приложения на Mac раз в минуту.";
+"Tells you which app drained your battery — looking back, not just now." = "Показывает, какое приложение разрядило батарею — не только сейчас, но и за прошлый период.";
+"Your data stays on this Mac. Nothing is sent over the network." = "Ваши данные остаются на этом Mac. Ничего не отправляется по сети.";
+"Uses a low-overhead background sampler." = "Использует фоновый сбор данных с низкой нагрузкой.";
+"Background tracking enabled." = "Фоновый сбор данных включён.";
+"Close" = "Закрыть";
+"Install failed: %@" = "Не удалось установить: %@";
+"Try again" = "Повторить";
+"Installing…" = "Установка…";
+"Enable background tracking" = "Включить фоновый сбор данных";
+"Not now" = "Не сейчас";
+"You can toggle this anytime in ⚙ Settings." = "Это можно изменить в любое время в ⚙ Настройки.";
+
+/* Language menu */
+"Language" = "Язык";
+"Use system language" = "Использовать язык системы";
+"Restart to change language" = "Перезапустите приложение, чтобы изменить язык";
+"OpenMacBattery needs to restart for the new language to take effect." = "OpenMacBattery необходимо перезапустить, чтобы применить новый язык.";
+"Restart Now" = "Перезапустить";
+"Later" = "Позже";

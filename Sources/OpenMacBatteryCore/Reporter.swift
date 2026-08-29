@@ -40,11 +40,11 @@ public final class Reporter {
             MAX(bundle_id) AS bid,
             COALESCE(MAX(display_name), MAX(bundle_id), 'unknown') AS dname,
             MAX(exec_path) AS epath,
-            COALESCE(SUM(energy_billed_raw), 0) AS energy,
+            COALESCE(SUM(energy_nj), 0) AS energy,
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0) AS cpu,
             COALESCE(SUM(pkg_idle_wakeups + interrupt_wakeups), 0) AS wk
         FROM samples
-        WHERE timestamp BETWEEN ? AND ? \(batteryClause)
+        WHERE timestamp BETWEEN ? AND ? AND energy_nj IS NOT NULL \(batteryClause)
         GROUP BY gkey
         ORDER BY energy DESC, cpu DESC
         LIMIT ?;
@@ -76,10 +76,11 @@ public final class Reporter {
             (timestamp / 3600) * 3600 AS bucket,
             bundle_id,
             COALESCE(display_name, bundle_id, 'unknown'),
-            COALESCE(SUM(energy_billed_raw), 0),
+            COALESCE(SUM(energy_nj), 0),
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0)
         FROM samples
         WHERE timestamp BETWEEN ? AND ?
+          AND energy_nj IS NOT NULL
           AND (bundle_id = ? OR display_name = ? OR display_name LIKE ?)
         GROUP BY bucket, bundle_id
         ORDER BY bucket ASC;
@@ -117,10 +118,11 @@ public final class Reporter {
             (timestamp / ?) * ? AS bucket,
             COALESCE(bundle_id, exec_path, 'unknown') AS gkey,
             COALESCE(display_name, bundle_id, 'unknown'),
-            COALESCE(SUM(energy_billed_raw), 0),
+            COALESCE(SUM(energy_nj), 0),
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0)
         FROM samples
         WHERE timestamp BETWEEN ? AND ?
+          AND energy_nj IS NOT NULL
           AND COALESCE(bundle_id, exec_path, 'unknown') IN (\(placeholders))
         GROUP BY bucket, gkey
         ORDER BY bucket ASC;
@@ -157,11 +159,11 @@ public final class Reporter {
             MAX(bundle_id) AS bid,
             COALESCE(MAX(display_name), MAX(bundle_id), 'unknown') AS dname,
             MAX(exec_path) AS epath,
-            COALESCE(SUM(energy_billed_raw), 0) AS energy,
+            COALESCE(SUM(energy_nj), 0) AS energy,
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0) AS cpu,
             COALESCE(SUM(pkg_idle_wakeups + interrupt_wakeups), 0) AS wk
         FROM samples
-        WHERE timestamp BETWEEN ? AND ? \(batteryClause)
+        WHERE timestamp BETWEEN ? AND ? AND energy_nj IS NOT NULL \(batteryClause)
         GROUP BY gkey
         ORDER BY energy DESC, cpu DESC;
         """
@@ -191,10 +193,11 @@ public final class Reporter {
         let sql = """
         SELECT
             (timestamp / ?) * ? AS bucket,
-            COALESCE(SUM(energy_billed_raw), 0),
+            COALESCE(SUM(energy_nj), 0),
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0)
         FROM samples
         WHERE timestamp BETWEEN ? AND ?
+          AND energy_nj IS NOT NULL
           AND COALESCE(bundle_id, exec_path, 'unknown') IN (\(placeholders))
         GROUP BY bucket
         ORDER BY bucket ASC;
@@ -254,10 +257,11 @@ public final class Reporter {
             (timestamp / ?) * ? AS bucket,
             ?,
             ?,
-            COALESCE(SUM(energy_billed_raw), 0),
+            COALESCE(SUM(energy_nj), 0),
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0)
         FROM samples
         WHERE timestamp BETWEEN ? AND ?
+          AND energy_nj IS NOT NULL
           AND COALESCE(bundle_id, exec_path, 'unknown') = ?
         GROUP BY bucket
         ORDER BY bucket ASC;
@@ -321,9 +325,9 @@ public final class Reporter {
         let sql = """
         SELECT
             COALESCE(bundle_id, exec_path, 'unknown') AS gkey,
-            COALESCE(SUM(energy_billed_raw), 0)
+            COALESCE(SUM(energy_nj), 0)
         FROM samples
-        WHERE timestamp BETWEEN ? AND ? \(batteryClause)
+        WHERE timestamp BETWEEN ? AND ? AND energy_nj IS NOT NULL \(batteryClause)
         GROUP BY gkey;
         """
         let stmt = try db.prepare(sql); defer { stmt.finalize() }
@@ -453,9 +457,9 @@ public final class Reporter {
         SELECT
             COALESCE(bundle_id, exec_path, 'unknown') AS gkey,
             (timestamp / ?) * ? AS bucket,
-            COALESCE(SUM(energy_billed_raw), 0)
+            COALESCE(SUM(energy_nj), 0)
         FROM samples
-        WHERE timestamp BETWEEN ? AND ? \(batteryClause)
+        WHERE timestamp BETWEEN ? AND ? AND energy_nj IS NOT NULL \(batteryClause)
         GROUP BY gkey, bucket
         ORDER BY gkey, bucket;
         """

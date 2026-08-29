@@ -57,13 +57,9 @@ struct HelpView: View {
                 }
 
                 section(title: "Joules vs scores?") {
-                    Text("Apple's `ri_billed_energy` counter is undocumented. Calibration estimates processor/package joules; it is not a battery-meter calibration:")
+                    Text("Apple's `ri_energy_nj` counter reports process energy in nanojoules. It is a processor/task estimate, not a battery-meter calibration:")
                         .foregroundStyle(.secondary)
-                    Text("openmacbattery calibrate --duration 300")
-                        .font(.system(.caption, design: .monospaced))
-                        .padding(8)
-                        .background(RoundedRectangle(cornerRadius: 4).fill(.background.tertiary))
-                    Text("Without calibration the UI shows percentages and level badges — relative comparisons are always correct.")
+                    Text("Energy values come from Apple's native process counter and are processor/task estimates, not battery-meter readings.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
 

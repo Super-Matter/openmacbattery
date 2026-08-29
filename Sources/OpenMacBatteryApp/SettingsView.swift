@@ -53,21 +53,11 @@ struct SettingsView: View {
 
             Section {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Calibration")
+                    Text("Energy measurement")
                         .font(.headline)
-                    Text("To estimate processor/package joules, run a one-time 5-minute comparison against Apple's powermetrics. This is not a battery-meter calibration. Requires sudo, run from Terminal:")
+                    Text("On Apple Silicon, OpenMacBattery uses Apple's native per-process energy counter in nanojoules. No sudo calibration is needed.")
                         .font(.caption).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("openmacbattery calibrate --duration 300")
-                        .font(.system(.caption, design: .monospaced))
-                        .padding(6)
-                        .background(RoundedRectangle(cornerRadius: 4).fill(.background.tertiary))
-                    Button("Copy command") {
-                        let pb = NSPasteboard.general
-                        pb.clearContents()
-                        pb.setString("\(embeddedCLIPath()) calibrate --duration 300", forType: .string)
-                    }
-                    .controlSize(.small)
                 }
             }
 

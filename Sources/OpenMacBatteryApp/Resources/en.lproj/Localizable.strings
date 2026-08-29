@@ -48,7 +48,12 @@
 
 /* Live watts card */
 "Charging now (~%@ W in)" = "Charging now (~%@ W in)";
+"Battery charging: ~%@ W" = "Battery charging: ~%@ W";
 "Drawing now: %@ watts" = "Drawing now: %@ watts";
+"Adapter: %d W" = "Adapter: %d W";
+"Adapter" = "Adapter";
+"Display (estimated): %.1f W" = "Display (estimated): %.1f W";
+"Brightness: %d%%" = "Brightness: %d%%";
 
 /* Battery life card */
 "%lld%% · charging — full in %@" = "%1$lld%% · charging — full in %2$@";
@@ -153,6 +158,9 @@
 "Quitting an app" = "Quitting an app";
 "Comparisons and warnings" = "Comparisons and warnings";
 "Joules vs scores?" = "Joules vs scores?";
+"Apple's `ri_energy_nj` counter reports process energy in nanojoules. It is a processor/task estimate, not a battery-meter calibration:" = "Apple's `ri_energy_nj` counter reports process energy in nanojoules. It is a processor/task estimate, not a battery-meter calibration:";
+"Energy values come from Apple's native process counter and are processor/task estimates, not battery-meter readings." = "Energy values come from Apple's native process counter and are processor/task estimates, not battery-meter readings.";
+"Apple's `ri_billed_energy` counter is undocumented. Calibration estimates processor/package joules; it is not a battery-meter calibration:" = "Apple's `ri_billed_energy` counter is undocumented. Calibration estimates processor/package joules; it is not a battery-meter calibration:";
 "Where is the data?" = "Where is the data?";
 "Troubleshooting" = "Troubleshooting";
 "About OpenMacBattery" = "About OpenMacBattery";
@@ -168,8 +176,9 @@
 "Open error log" = "Open error log";
 "Open data folder" = "Open data folder";
 "Diagnostics" = "Diagnostics";
-"Calibration" = "Calibration";
-"To convert to real joules, run a one-time 5-minute comparison against Apple's powermetrics. Requires sudo, run from Terminal:" = "To convert to real joules, run a one-time 5-minute comparison against Apple's powermetrics. Requires sudo, run from Terminal:";
+"Energy measurement" = "Energy measurement";
+"On Apple Silicon, OpenMacBattery uses Apple's native per-process energy counter in nanojoules. No sudo calibration is needed." = "On Apple Silicon, OpenMacBattery uses Apple's native per-process energy counter in nanojoules. No sudo calibration is needed.";
+"To estimate processor/package joules, run a one-time 5-minute comparison against Apple's powermetrics. This is not a battery-meter calibration. Requires sudo, run from Terminal:" = "To estimate processor/package joules, run a one-time 5-minute comparison against Apple's powermetrics. This is not a battery-meter calibration. Requires sudo, run from Terminal:";
 "Copy command" = "Copy command";
 "Remove background tracking entirely" = "Remove background tracking entirely";
 "Advanced" = "Advanced";
@@ -183,7 +192,7 @@
 "Checks every running app on your Mac once per minute." = "Checks every running app on your Mac once per minute.";
 "Tells you which app drained your battery — looking back, not just now." = "Tells you which app drained your battery — looking back, not just now.";
 "Your data stays on this Mac. Nothing is sent over the network." = "Your data stays on this Mac. Nothing is sent over the network.";
-"Uses almost no battery itself (~1-2 joules per hour)." = "Uses almost no battery itself (~1-2 joules per hour).";
+"Uses a low-overhead background sampler." = "Uses a low-overhead background sampler.";
 "Background tracking enabled." = "Background tracking enabled.";
 "Close" = "Close";
 "Install failed: %@" = "Install failed: %@";

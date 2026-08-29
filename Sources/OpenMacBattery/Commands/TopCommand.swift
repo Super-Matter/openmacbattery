@@ -26,7 +26,7 @@ struct TopCommand: ParsableCommand {
         let factor = db.meta(key: "energy_unit_factor").flatMap { Double($0) }
 
         let total = rows.reduce(Int64(0)) { $0 + $1.energyRaw }
-        let calibTag = factor != nil ? "calibrated" : "uncalibrated (showing raw score)"
+        let calibTag = factor != nil ? "native process nJ" : "unavailable (no direct energy samples)"
         print("Top energy consumers — last \(since)\(onBattery ? " (battery only)" : "")")
         print("Energy unit: \(calibTag)\n")
 

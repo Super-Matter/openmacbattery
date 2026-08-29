@@ -436,6 +436,19 @@ struct LiveWattCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(headline).font(.headline)
                     Text(subtext).font(.caption).foregroundStyle(.secondary)
+                    if let displayWatts = model.displayPowerWatts {
+                        Text(String(format: NSLocalizedString("Display (estimated): %.1f W", comment: ""), displayWatts))
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    if let brightness = model.displayBrightnessPercent {
+                        Text(String(format: NSLocalizedString("Brightness: %d%%", comment: ""), brightness))
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    if let adapterWatts = model.batterySnapshot?.adapterWatts,
+                       model.batterySnapshot?.externalConnected == true {
+                        Text(String(format: NSLocalizedString("Adapter: %d W", comment: ""), adapterWatts))
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 if !top3.isEmpty {
@@ -467,7 +480,7 @@ struct LiveWattCard: View {
         guard let r = model.liveWatts else { return "" }
         let watts = String(format: "%.1f", r.watts)
         if r.isCharging {
-            return String(format: NSLocalizedString("Charging now (~%@ W in)", comment: ""), watts)
+            return String(format: NSLocalizedString("Battery charging: ~%@ W", comment: ""), watts)
         }
         return String(format: NSLocalizedString("Drawing now: %@ watts", comment: ""), watts)
     }
@@ -564,6 +577,9 @@ struct BatteryLifeCard: View {
         }
         if !snap.isCharging, let m = snap.macOsTimeRemainingMin, m > 0 {
             parts.append(String(format: NSLocalizedString("macOS estimate: %@", comment: ""), formatMinutes(m)))
+        }
+        if snap.externalConnected, let watts = snap.adapterWatts {
+            parts.append(String(format: NSLocalizedString("Adapter: %d W", comment: ""), watts))
         }
         parts.append("\(String(format: "%.1f", snap.remainingWh)) / \(String(format: "%.1f", snap.fullWh)) Wh")
         return parts.isEmpty ? nil : parts.joined(separator: " · ")

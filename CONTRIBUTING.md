@@ -21,7 +21,7 @@ swift test
 
 ## Translations
 
-UI is localized in 8 languages under `Sources/OpenMacBatteryApp/Resources/{lang}.lproj/Localizable.strings`. The non-English translations are **machine-quality** as a starting point — native-speaker reviews are highly welcome.
+UI is localized in 9 languages under `Sources/OpenMacBatteryApp/Resources/{lang}.lproj/Localizable.strings`. The non-English translations are **machine-quality** as a starting point — native-speaker reviews are highly welcome.
 
 To improve a translation:
 

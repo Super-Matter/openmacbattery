@@ -22,7 +22,7 @@ struct ExportCommand: ParsableCommand {
         var sql = """
         SELECT timestamp, pid, bundle_id, display_name,
                cpu_user_ns, cpu_system_ns,
-               energy_billed_raw, energy_serviced_raw,
+               energy_billed_raw, energy_serviced_raw, energy_nj,
                pkg_idle_wakeups, interrupt_wakeups,
                disk_read_bytes, disk_write_bytes,
                is_on_battery, battery_percent, rusage_version
@@ -43,7 +43,7 @@ struct ExportCommand: ParsableCommand {
 
         switch format {
         case .csv:
-            print("timestamp,pid,bundle_id,display_name,cpu_user_ns,cpu_system_ns,energy_billed_raw,energy_serviced_raw,pkg_idle_wakeups,interrupt_wakeups,disk_read_bytes,disk_write_bytes,is_on_battery,battery_percent,rusage_version")
+            print("timestamp,pid,bundle_id,display_name,cpu_user_ns,cpu_system_ns,energy_billed_raw,energy_serviced_raw,energy_nj,pkg_idle_wakeups,interrupt_wakeups,disk_read_bytes,disk_write_bytes,is_on_battery,battery_percent,rusage_version")
             while stmt.step() {
                 let cols: [String] = [
                     String(stmt.int64(0)),
@@ -54,13 +54,14 @@ struct ExportCommand: ParsableCommand {
                     String(stmt.int64(5)),
                     stmt.isNull(6) ? "" : String(stmt.int64(6)),
                     stmt.isNull(7) ? "" : String(stmt.int64(7)),
-                    String(stmt.int64(8)),
+                    stmt.isNull(8) ? "" : String(stmt.int64(8)),
                     String(stmt.int64(9)),
                     String(stmt.int64(10)),
                     String(stmt.int64(11)),
                     String(stmt.int64(12)),
-                    stmt.isNull(13) ? "" : String(stmt.int64(13)),
-                    String(stmt.int64(14)),
+                    String(stmt.int64(13)),
+                    stmt.isNull(14) ? "" : String(stmt.int64(14)),
+                    String(stmt.int64(15)),
                 ]
                 print(cols.joined(separator: ","))
             }
@@ -72,9 +73,10 @@ struct ExportCommand: ParsableCommand {
                 first = false
                 let energy = stmt.isNull(6) ? "null" : "\(stmt.int64(6))"
                 let serviced = stmt.isNull(7) ? "null" : "\(stmt.int64(7))"
-                let bp = stmt.isNull(13) ? "null" : "\(stmt.int64(13))"
+                let energyNj = stmt.isNull(8) ? "null" : "\(stmt.int64(8))"
+                let bp = stmt.isNull(14) ? "null" : "\(stmt.int64(14))"
                 let row = """
-                {"timestamp":\(stmt.int64(0)),"pid":\(stmt.int64(1)),"bundle_id":\(jsonStr(stmt.string(2))),"display_name":\(jsonStr(stmt.string(3))),"cpu_user_ns":\(stmt.int64(4)),"cpu_system_ns":\(stmt.int64(5)),"energy_billed_raw":\(energy),"energy_serviced_raw":\(serviced),"pkg_idle_wakeups":\(stmt.int64(8)),"interrupt_wakeups":\(stmt.int64(9)),"disk_read_bytes":\(stmt.int64(10)),"disk_write_bytes":\(stmt.int64(11)),"is_on_battery":\(stmt.int64(12)),"battery_percent":\(bp),"rusage_version":\(stmt.int64(14))}
+                {"timestamp":\(stmt.int64(0)),"pid":\(stmt.int64(1)),"bundle_id":\(jsonStr(stmt.string(2))),"display_name":\(jsonStr(stmt.string(3))),"cpu_user_ns":\(stmt.int64(4)),"cpu_system_ns":\(stmt.int64(5)),"energy_billed_raw":\(energy),"energy_serviced_raw":\(serviced),"energy_nj":\(energyNj),"pkg_idle_wakeups":\(stmt.int64(9)),"interrupt_wakeups":\(stmt.int64(10)),"disk_read_bytes":\(stmt.int64(11)),"disk_write_bytes":\(stmt.int64(12)),"is_on_battery":\(stmt.int64(13)),"battery_percent":\(bp),"rusage_version":\(stmt.int64(15))}
                 """
                 print(row, terminator: "")
             }

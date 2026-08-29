@@ -140,6 +140,14 @@ public final class Database {
             try exec(Schema.v1)
             try setMeta(key: "schema_version", value: "1")
         }
+        if v < 2 {
+            try exec("ALTER TABLE samples ADD COLUMN energy_nj INTEGER;")
+            try exec("DELETE FROM hourly_aggregates;")
+            try setMeta(key: "energy_metric", value: "ri_energy_nj")
+            try setMeta(key: "energy_unit_factor", value: "1e-9")
+            try setMeta(key: "energy_unit_calibrated_at", value: "native")
+            try setMeta(key: "schema_version", value: "2")
+        }
     }
 }
 

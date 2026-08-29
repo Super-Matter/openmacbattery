@@ -10,6 +10,7 @@ public struct SampleBaseline {
     var diskWrite: UInt64
     var billedEnergy: UInt64
     var servicedEnergy: UInt64
+    var energyNanojoules: UInt64?
 }
 
 public struct SamplerConfig {
@@ -112,11 +113,11 @@ public final class Sampler {
         INSERT INTO samples
             (timestamp, pid, proc_start_sec, bundle_id, display_name, exec_path,
              cpu_user_ns, cpu_system_ns,
-             energy_billed_raw, energy_serviced_raw,
+             energy_billed_raw, energy_serviced_raw, energy_nj,
              pkg_idle_wakeups, interrupt_wakeups,
              disk_read_bytes, disk_write_bytes,
              is_on_battery, battery_percent, rusage_version)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
         """
         let stmt = try db.prepare(insertSQL)
         defer { stmt.finalize() }
@@ -148,7 +149,12 @@ public final class Sampler {
                     diskRead: d(ru.diskReadBytes, prev?.diskRead),
                     diskWrite: d(ru.diskWriteBytes, prev?.diskWrite),
                     billedEnergy: d(ru.billedEnergy, prev?.billedEnergy),
-                    servicedEnergy: d(ru.servicedEnergy, prev?.servicedEnergy)
+                    servicedEnergy: d(ru.servicedEnergy, prev?.servicedEnergy),
+                    energyNanojoules: {
+                        guard let current = ru.energyNanojoules,
+                              let previous = prev?.energyNanojoules else { return nil }
+                        return current >= previous ? current - previous : 0
+                    }()
                 )
 
                 baselines[key] = SampleBaseline(
@@ -159,7 +165,8 @@ public final class Sampler {
                     diskRead: ru.diskReadBytes,
                     diskWrite: ru.diskWriteBytes,
                     billedEnergy: ru.billedEnergy,
-                    servicedEnergy: ru.servicedEnergy
+                    servicedEnergy: ru.servicedEnergy,
+                    energyNanojoules: ru.energyNanojoules
                 )
 
                 // İlk sample'ı (baseline yokken) atla — delta bilgisi anlamsız
@@ -181,13 +188,18 @@ public final class Sampler {
                     try stmt.bindNull(9)
                     try stmt.bindNull(10)
                 }
-                try stmt.bind(11, delta.pkgIdleWakeups)
-                try stmt.bind(12, delta.interruptWakeups)
-                try stmt.bind(13, delta.diskRead)
-                try stmt.bind(14, delta.diskWrite)
-                try stmt.bind(15, Int64(power.isOnBattery ? 1 : 0))
-                if let p = power.batteryPercent { try stmt.bind(16, Int64(p)) } else { try stmt.bindNull(16) }
-                try stmt.bind(17, Int64(ru.rusageVersion))
+                if let energy = delta.energyNanojoules {
+                    try stmt.bind(11, energy)
+                } else {
+                    try stmt.bindNull(11)
+                }
+                try stmt.bind(12, delta.pkgIdleWakeups)
+                try stmt.bind(13, delta.interruptWakeups)
+                try stmt.bind(14, delta.diskRead)
+                try stmt.bind(15, delta.diskWrite)
+                try stmt.bind(16, Int64(power.isOnBattery ? 1 : 0))
+                if let p = power.batteryPercent { try stmt.bind(17, Int64(p)) } else { try stmt.bindNull(17) }
+                try stmt.bind(18, Int64(ru.rusageVersion))
                 _ = stmt.step()
                 insertedRows += 1
             }

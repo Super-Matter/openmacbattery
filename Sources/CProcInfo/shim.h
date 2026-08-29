@@ -25,6 +25,7 @@ typedef struct {
     uint64_t diskio_byteswritten;
     uint64_t billed_energy;
     uint64_t serviced_energy;
+    uint64_t energy_nj;
     uint64_t runnable_time_ns;
     int      version;        // 4 veya 6
     int      ok;             // 1 başarı, 0 fail (errno bt_last_errno ile)
@@ -40,6 +41,7 @@ static inline bt_rusage_t bt_proc_rusage(pid_t pid) {
     out.diskio_byteswritten = 0;
     out.billed_energy = 0;
     out.serviced_energy = 0;
+    out.energy_nj = 0;
     out.runnable_time_ns = 0;
     out.version = 0;
     out.ok = 0;
@@ -55,6 +57,7 @@ static inline bt_rusage_t bt_proc_rusage(pid_t pid) {
         out.diskio_byteswritten = ru6.ri_diskio_byteswritten;
         out.billed_energy       = ru6.ri_billed_energy;
         out.serviced_energy     = ru6.ri_serviced_energy;
+        out.energy_nj           = ru6.ri_energy_nj;
         out.runnable_time_ns    = ru6.ri_runnable_time;
         out.version = 6;
         out.ok = 1;

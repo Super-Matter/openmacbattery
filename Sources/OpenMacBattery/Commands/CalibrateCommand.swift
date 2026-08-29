@@ -5,7 +5,7 @@ import OpenMacBatteryCore
 struct CalibrateCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "calibrate",
-        abstract: "Calibrate energy unit factor against powermetrics (sudo required)"
+        abstract: "Show native process energy measurement status"
     )
 
     @Option(name: .long, help: "Calibration duration in seconds")
@@ -22,37 +22,21 @@ struct CalibrateCommand: ParsableCommand {
 
         if show {
             if let f = db.meta(key: "energy_unit_factor") {
-                print("Current estimated package factor: \(f) J / raw_unit")
+                print("Current native energy factor: \(f) J / nJ")
                 if let when = db.meta(key: "energy_unit_calibrated_at") {
                     print("Calibrated at:  \(when)")
                 }
             } else {
-                print("Not calibrated. Run: openmacbattery calibrate --duration 300")
+                print("Native energy measurement is not initialized; run: openmacbattery calibrate")
             }
             return
         }
 
-        print("Running powermetrics for \(duration)s — sudo password may be requested.")
-        print("Tip: open a CPU workload during this window for a better fit.\n")
-
-        let result: CalibrationResult
-        do {
-            result = try Calibrator.run(durationSec: duration, intervalMs: intervalMs)
-        } catch {
-            print("Calibration failed: \(error)")
-            throw ExitCode(1)
-        }
-
-        try db.setMeta(key: "energy_unit_factor", value: String(result.factor))
-        let when = ISO8601DateFormatter().string(from: Date())
-        try db.setMeta(key: "energy_unit_calibrated_at", value: when)
-
-        print("Calibration complete.")
-        print("  Duration:        \(String(format: "%.1f", result.durationSec))s")
-        print("  Plist samples:   \(result.plistSampleCount)")
-        print("  Estimated processor energy: \(String(format: "%.2f J", result.totalJoules))")
-        print("  Total raw delta:            \(result.totalRawDelta)")
-        print("  Factor (estimated package): \(result.factor) J / raw_unit")
-        print("  Stored at:       \(when)")
+        try db.setMeta(key: "energy_metric", value: "ri_energy_nj")
+        try db.setMeta(key: "energy_unit_factor", value: "1e-9")
+        print("Native energy measurement is already enabled.")
+        print("  Source:  ri_energy_nj")
+        print("  Unit:    1 nJ = 1e-9 J")
+        print("  No sudo calibration is needed on Apple Silicon.")
     }
 }

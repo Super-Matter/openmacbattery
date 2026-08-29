@@ -17,7 +17,8 @@ enum AppLanguages {
         .init(code: "de",      nativeName: "Deutsch",       englishName: "German"),
         .init(code: "fr",      nativeName: "Français",      englishName: "French"),
         .init(code: "ja",      nativeName: "日本語",         englishName: "Japanese"),
-        .init(code: "pt-BR",   nativeName: "Português (BR)", englishName: "Brazilian Portuguese")
+        .init(code: "pt-BR",   nativeName: "Português (BR)", englishName: "Brazilian Portuguese"),
+        .init(code: "ru",      nativeName: "Русский",          englishName: "Russian")
     ]
 
     /// Şu an aktif dil kodu — UserDefaults'tan AppleLanguages array'inin ilk elemanı.

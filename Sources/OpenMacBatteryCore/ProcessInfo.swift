@@ -10,6 +10,7 @@ public struct ProcRusage {
     public let diskWriteBytes: UInt64
     public let billedEnergy: UInt64
     public let servicedEnergy: UInt64
+    public let energyNanojoules: UInt64?
     public let runnableTimeNs: UInt64
     public let rusageVersion: Int  // 4 veya 6, 0 = fail
 }
@@ -53,6 +54,7 @@ public enum ProcessInfoReader {
             diskWriteBytes: r.diskio_byteswritten,
             billedEnergy: r.billed_energy,
             servicedEnergy: r.serviced_energy,
+            energyNanojoules: r.version >= 6 ? r.energy_nj : nil,
             runnableTimeNs: r.runnable_time_ns,
             rusageVersion: Int(r.version)
         )

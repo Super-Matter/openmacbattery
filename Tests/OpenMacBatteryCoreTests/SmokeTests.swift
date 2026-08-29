@@ -15,6 +15,7 @@ final class SmokeTests: XCTestCase {
         }
         XCTAssertGreaterThan(r.userTimeNs + r.systemTimeNs, 0)
         XCTAssertTrue(r.rusageVersion == 4 || r.rusageVersion == 6)
+        if r.rusageVersion == 6 { XCTAssertNotNil(r.energyNanojoules) }
     }
 
     func testDatabaseRoundtrip() throws {
@@ -40,6 +41,11 @@ final class SmokeTests: XCTestCase {
 
     func testPowerSourceReadsWithoutCrashing() {
         _ = PowerSourceReader.current()
+    }
+
+    func testDisplayPowerEstimate() {
+        XCTAssertEqual(DisplayPowerEstimate.estimatedWatts(brightness: 0.5, displayCount: 1), 2.3, accuracy: 0.001)
+        XCTAssertEqual(DisplayPowerEstimate.estimatedWatts(brightness: 1, displayCount: 2), 8.0, accuracy: 0.001)
     }
 
     func testEnergyFormatter() {

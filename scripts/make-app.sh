@@ -13,7 +13,7 @@ cd "$ROOT"
 INSTALL_TO_APPLICATIONS=0
 for arg in "$@"; do
     case "$arg" in
-        --install) INSTALL_TO_APPLICATIONS=1 ;;
+    --install) INSTALL_TO_APPLICATIONS=1 ;;
     esac
 done
 
@@ -26,7 +26,7 @@ mkdir -p "$APP_DIR/Contents/MacOS"
 mkdir -p "$APP_DIR/Contents/Resources"
 
 cp .build/release/openmacbattery-gui "$APP_DIR/Contents/MacOS/OpenMacBattery"
-cp .build/release/openmacbattery     "$APP_DIR/Contents/Resources/openmacbattery"
+cp .build/release/openmacbattery "$APP_DIR/Contents/Resources/openmacbattery"
 
 # App icon
 if [ -f "$ROOT/assets/AppIcon.icns" ]; then
@@ -40,16 +40,20 @@ if [ -n "$SPM_BUNDLE" ]; then
         [ -d "$lproj" ] || continue
         name=$(basename "$lproj")
         case "$name" in
-            zh-hans.lproj) name="zh-Hans.lproj" ;;
-            zh-hant.lproj) name="zh-Hant.lproj" ;;
-            pt-br.lproj)   name="pt-BR.lproj" ;;
+        zh-hans.lproj) name="zh-Hans.lproj" ;;
+        zh-hant.lproj) name="zh-Hant.lproj" ;;
+        pt-br.lproj) name="pt-BR.lproj" ;;
         esac
         cp -R "$lproj" "$APP_DIR/Contents/Resources/$name"
     done
-    echo "Localizations: $(ls "$APP_DIR/Contents/Resources/" | grep -c .lproj)"
+    localization_count=0
+    for installed_lproj in "$APP_DIR/Contents/Resources/"*.lproj; do
+        [ -d "$installed_lproj" ] && localization_count=$((localization_count + 1))
+    done
+    echo "Localizations: $localization_count"
 fi
 
-cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
+cat >"$APP_DIR/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -76,6 +80,7 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
         <string>fr</string>
         <string>ja</string>
         <string>pt-BR</string>
+        <string>ru</string>
     </array>
 </dict>
 </plist>
