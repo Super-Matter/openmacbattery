@@ -137,26 +137,50 @@ final class AppModel: ObservableObject {
     @Published var avgWatts1h: Double? = nil              // son 1 saatlik ortalama gerçek W
     @Published var stats = DBStats()
     @Published var lastRefresh: Date = Date()
-    @Published var lastLiveRefresh: Date = Date()
     @Published var loading: Bool = false
     @Published var errorMessage: String? = nil
 
     private var refreshTimer: Timer?
     private var liveTimer: Timer?
+    private let liveRefreshInterval: TimeInterval = 60
 
     init() {
         // Timer closure'larında "weak self"i Task'a girmeden önce strong'a alıyoruz.
         // Swift 6 strict-concurrency, mutable captured self'in concurrent context'te
         // doğrudan kullanılmasına izin vermez; unwrap'leyince Task immutable constant kapatır.
+        startRefreshTimer()
+        refreshLiveWatts()
+        startLiveTimer()
+    }
+
+    private func startRefreshTimer() {
+        refreshTimer?.invalidate()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in self.refreshNow() }
         }
-        liveTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
+    }
+
+    private func startLiveTimer() {
+        liveTimer?.invalidate()
+        liveTimer = Timer.scheduledTimer(withTimeInterval: liveRefreshInterval, repeats: true) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in self.refreshLiveWatts() }
         }
-        refreshLiveWatts()
+    }
+
+    func setLiveMonitoring(_ enabled: Bool) {
+        if enabled {
+            if refreshTimer == nil { startRefreshTimer() }
+            guard liveTimer == nil else { return }
+            refreshLiveWatts()
+            startLiveTimer()
+        } else {
+            refreshTimer?.invalidate()
+            refreshTimer = nil
+            liveTimer?.invalidate()
+            liveTimer = nil
+        }
     }
 
     /// IOPS okuması ucuz; per-app dağılım için ekstra DB query açmıyoruz —
@@ -164,23 +188,24 @@ final class AppModel: ObservableObject {
     func refreshLiveWatts() {
         let reading = PowerSourceReader.liveWatts()
         let display = PowerSourceReader.displayPowerEstimate()
-        self.liveWatts = reading
-        self.displayPowerWatts = display?.watts
-        self.displayBrightnessPercent = display?.brightness.map { Int(($0 * 100).rounded()) }
-        self.batterySnapshot = PowerSourceReader.batterySnapshot()
+        let brightness = display?.brightness.map { Int(($0 * 100).rounded()) }
+        let snapshot = PowerSourceReader.batterySnapshot()
+        if liveWatts != reading { liveWatts = reading }
+        if displayPowerWatts != display?.watts { displayPowerWatts = display?.watts }
+        if displayBrightnessPercent != brightness { displayBrightnessPercent = brightness }
+        if batterySnapshot != snapshot { batterySnapshot = snapshot }
         if let r = reading, r.watts > 0.1, totalUserEnergy > 0 {
             var dist: [String: Double] = [:]
             for app in apps where !app.isSystem {
                 let frac = Double(max(app.energyRaw, 0)) / Double(totalUserEnergy)
                 dist[app.id] = frac * r.watts
             }
-            self.liveAppWatts = dist
-        } else {
-            self.liveAppWatts = [:]
+            if liveAppWatts != dist { liveAppWatts = dist }
+        } else if !liveAppWatts.isEmpty {
+            liveAppWatts = [:]
         }
-        // Keep the 15-second path limited to the live IOKit readings. The
-        // historical average is refreshed with the normal 60-second reload.
-        self.lastLiveRefresh = Date()
+        // Keep this path limited to live IOKit readings. Historical data is
+        // refreshed separately by the normal 60-second reload.
     }
 
     func refreshNow() {

@@ -56,7 +56,7 @@ struct BatteryDetailsView: View {
 
             Divider()
             HStack {
-                Text("Refreshes every 15 seconds")
+                Text("Refreshes every 60 seconds")
                     .font(.caption2).foregroundStyle(.secondary)
                 Spacer()
                 Button("Refresh now") { model.refreshLiveWatts() }

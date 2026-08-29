@@ -4,6 +4,7 @@ import OpenMacBatteryCore
 
 @main
 struct OpenMacBatteryApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var model = AppModel()
     @State private var showOnboarding: Bool = !DaemonInstaller.isInstalled
 
@@ -28,6 +29,9 @@ struct OpenMacBatteryApp: App {
                 .environmentObject(model)
                 .frame(minWidth: 900, minHeight: 600)
                 .onAppear { model.refreshNow() }
+                .onChange(of: scenePhase) { _, phase in
+                    model.setLiveMonitoring(phase == .active)
+                }
                 .sheet(isPresented: $showOnboarding) {
                     OnboardingView(isPresented: $showOnboarding)
                 }

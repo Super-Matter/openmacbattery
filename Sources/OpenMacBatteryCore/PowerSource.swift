@@ -12,7 +12,7 @@ public struct PowerState {
 }
 
 /// Pil sağlığı + kapasite + macOS'un kalan süre tahmini.
-public struct BatterySnapshot {
+public struct BatterySnapshot: Equatable {
     public let percent: Int                // 0-100
     public let isCharging: Bool
     public let externalConnected: Bool     // adaptör takılı mı (şarj olmasa bile)
@@ -48,7 +48,7 @@ public struct BatterySnapshot {
 }
 
 /// Anlık güç çekişi (W). Pozitif = pildeyken çekiş, negatif = şarj olurken doluş.
-public struct LivePowerReading {
+public struct LivePowerReading: Equatable {
     public let watts: Double          // mutlak değer
     public let isCharging: Bool
     public let amperage_mA: Int       // ham
@@ -65,7 +65,7 @@ public struct LivePowerReading {
     }
 }
 
-public struct DisplayPowerEstimate {
+public struct DisplayPowerEstimate: Equatable {
     public let watts: Double
     public let displayCount: Int
     public let brightness: Double?

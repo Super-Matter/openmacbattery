@@ -59,7 +59,7 @@ struct MainToolbar: ToolbarContent {
             BatteryDetailsToolbarButton(model: model)
         }
         ToolbarItem(placement: .primaryAction) {
-            RefreshRingButton(model: model, cycleSec: 15)
+            RefreshRingButton(model: model)
         }
     }
 }
