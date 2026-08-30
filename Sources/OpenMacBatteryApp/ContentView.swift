@@ -546,26 +546,29 @@ struct BatteryLifeCard: View {
 
     private func headline(snap: BatterySnapshot) -> String {
         if snap.isCharging {
+            if let limit = snap.chargeLimitPercent, limit < 100 {
+                if let m = snap.macOsTimeRemainingMin, m > 0 {
+                    return String(format: NSLocalizedString("%lld%% · charging to %lld%% in %@", comment: ""), snap.percent, limit, formatMinutes(m))
+                }
+                return String(format: NSLocalizedString("%lld%% · charging to %lld%%", comment: ""), snap.percent, limit)
+            }
             if let m = snap.macOsTimeRemainingMin, m > 0 {
                 return String(format: NSLocalizedString("%lld%% · charging — full in %@", comment: ""), snap.percent, formatMinutes(m))
             }
             return String(format: NSLocalizedString("%lld%% · charging", comment: ""), snap.percent)
         }
         if snap.externalConnected {
+            if let limit = snap.chargeLimitPercent,
+               !snap.isCharging, snap.percent >= limit - 1 {
+                return String(format: NSLocalizedString("%lld%% · charge limit reached", comment: ""), snap.percent)
+            }
             return String(format: NSLocalizedString("%lld%% · plugged in (not charging)", comment: ""), snap.percent)
         }
-        let ourEstimateMin: Int?
-        if let w = model.avgWatts1h, w > 0.5 {
-            let hours = snap.remainingWh / w
-            ourEstimateMin = Int(hours * 60)
-        } else if let live = model.liveWatts, live.watts > 0.5, !live.isCharging {
-            let hours = snap.remainingWh / live.watts
-            ourEstimateMin = Int(hours * 60)
-        } else {
-            ourEstimateMin = nil
+        if let adjusted = model.adjustedRemainingMin, adjusted > 0 {
+            return String(format: NSLocalizedString("%lld%% · ~%@ remaining", comment: ""), snap.percent, formatMinutes(adjusted))
         }
-        if let m = ourEstimateMin {
-            return String(format: NSLocalizedString("%lld%% · ~%@ of battery left", comment: ""), snap.percent, formatMinutes(m))
+        if let m = snap.macOsTimeRemainingMin, m > 0 {
+            return String(format: NSLocalizedString("%lld%% · %@ remaining", comment: ""), snap.percent, formatMinutes(m))
         }
         return String(format: NSLocalizedString("%lld%% · on battery", comment: ""), snap.percent)
     }
@@ -575,8 +578,13 @@ struct BatteryLifeCard: View {
         if !snap.isCharging, let w = model.avgWatts1h {
             parts.append(String(format: NSLocalizedString("Last hour avg: %.1f W", comment: ""), w))
         }
-        if !snap.isCharging, let m = snap.macOsTimeRemainingMin, m > 0 {
-            parts.append(String(format: NSLocalizedString("macOS estimate: %@", comment: ""), formatMinutes(m)))
+        if let adjusted = model.adjustedRemainingMin,
+           let system = snap.macOsTimeRemainingMin,
+           adjusted != system {
+            parts.append(String(format: NSLocalizedString("macOS estimate: %@", comment: ""), formatMinutes(system)))
+        }
+        if let limit = snap.chargeLimitPercent {
+            parts.append(String(format: NSLocalizedString("Charge limit: %d%%", comment: ""), limit))
         }
         if snap.externalConnected, let watts = snap.adapterWatts {
             parts.append(String(format: NSLocalizedString("Adapter: %d W", comment: ""), watts))

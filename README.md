@@ -81,6 +81,17 @@ Three pieces, one binary:
 
 The SQLite database uses WAL mode + `auto_vacuum=INCREMENTAL`. Hourly aggregates are rolled up automatically; raw samples older than 7 days and aggregates older than 180 days are pruned daily at ~03:00.
 
+## Battery impact
+
+OpenMacBattery is deliberately quiet when idle:
+
+- The background sampler runs at low priority every 60 seconds, samples only the current user's processes, batches SQLite writes in a transaction, and self-throttles to 120 seconds if a sample takes too long.
+- The GUI uses one 60-second refresh path for live wattage, battery, adapter, brightness, and history. The toolbar refresh button is manual and has no animation timer.
+- GUI polling stops while the app is inactive, and unchanged readings do not trigger SwiftUI updates.
+- Brightness and display power are read only during the same refresh; display power remains an estimate because macOS does not expose a public watt meter.
+
+A representative idle measurement on an M1 MacBook Air using `powermetrics` showed the GUI at `0.33 CPU ms/s` with `0.01` Energy Impact and the daemon at `0.01 CPU ms/s` with `0.00` Energy Impact. A pre-optimization sample showed `211.20 CPU ms/s` and `32.35` Energy Impact for the GUI. These are device- and workload-dependent samples, not guarantees.
+
 ## Honest caveats
 
 - **`ri_energy_nj` is process energy, not battery energy.** It is a native macOS counter in nanojoules and represents a processor/task estimate; it does not measure the complete battery drain or display power.
@@ -149,7 +160,7 @@ rm -f "$HOME/Library/Logs/openmacbattery.log" \
 | **"App can't be opened, unidentified developer"** on first launch | Right-click the `.app` → **Open** → **Open**. macOS remembers this for next time. Standard for ad-hoc signed apps. |
 | **Sidebar empty after install** | Daemon needs ≥ 2 minutes to compute the first deltas. Check with `openmacbattery daemon status`. |
 | **No data accumulating** | Open **Settings** in the app and confirm *Background tracking* is **On**. If off, toggle it. |
-| **GUI looks stale** | Click the refresh-ring in the toolbar (top right) or press ⌘R. Live wattage updates every 15 s; full reload every 60 s. |
+| **GUI looks stale** | Click the refresh button in the toolbar (top right) or press ⌘R. Live wattage and history update every 60 s. |
 | **Energy values look strange** | Energy uses macOS's native `ri_energy_nj` counter on supported Apple Silicon Macs. Restart sampling after an update and allow at least two samples for new data. |
 | **Can't quit a system service from the right-click menu** | By design — system services (root-owned, sandboxed Apple daemons) can't be terminated by user-level processes. Use Activity Monitor with admin privileges if you really need to. |
 | **Reset everything** | `openmacbattery reset --confirm` deletes the database and starts fresh. |

@@ -30,6 +30,9 @@ struct BatteryDetailsView: View {
                     row("Full Charge Capacity", "\(formatThousands(s.maxCapacity_mAh)) mAh")
                     row("Design Capacity", "\(formatThousands(s.designCapacity_mAh)) mAh")
                     row("Health", "\(s.healthPercent)%\(healthSuffix(s))")
+                    if s.chargeLimitPercent != nil {
+                        row("Charge limit", chargeLimitValue(s))
+                    }
                     row("Charge Cycles", "\(s.cycleCount)")
                     row("Manufacture Date", "—")
                         .help("Apple Silicon Macs don't expose this in a parseable format")
@@ -94,6 +97,14 @@ struct BatteryDetailsView: View {
         if s.healthPercent >= 60 { return NSLocalizedString(" (fair)", comment: "") }
         return NSLocalizedString(" (poor)", comment: "")
     }
+    private func chargeLimitValue(_ s: BatterySnapshot) -> String {
+        guard let limit = s.chargeLimitPercent else { return "—" }
+        if s.externalConnected && !s.isCharging && s.percent >= limit - 1 {
+            return String(format: NSLocalizedString("%d%% · reached", comment: ""), limit)
+        }
+        return "\(limit)%"
+    }
+
     private func dischargeLabel(_ s: BatterySnapshot) -> LocalizedStringKey {
         if s.isCharging { return "Charging current" }
         if s.externalConnected { return "Drawing" }

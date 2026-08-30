@@ -41,6 +41,7 @@ final class SmokeTests: XCTestCase {
 
     func testPowerSourceReadsWithoutCrashing() {
         _ = PowerSourceReader.current()
+        _ = PowerSourceReader.batterySnapshot()
     }
 
     func testDisplayPowerEstimate() {

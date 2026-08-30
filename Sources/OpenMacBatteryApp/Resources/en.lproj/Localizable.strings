@@ -59,13 +59,21 @@
 /* Battery life card */
 "%lld%% · charging — full in %@" = "%1$lld%% · charging — full in %2$@";
 "%lld%% · charging" = "%lld%% · charging";
+"%lld%% · charging to %lld%%" = "%1$lld%% · charging to %2$lld%%";
+"%lld%% · charging to %lld%% in %@" = "%1$lld%% · charging to %2$lld%% in %3$@";
 "%lld%% · plugged in (not charging)" = "%lld%% · plugged in (not charging)";
+"%lld%% · charge limit reached" = "%lld%% · charge limit reached";
+"%lld%% · %@ remaining" = "%1$lld%% · %2$@ remaining";
+"%lld%% · ~%@ remaining" = "%1$lld%% · ~%2$@ remaining";
 "%lld%% · ~%@ of battery left" = "%1$lld%% · ~%2$@ of battery left";
 "%lld%% · on battery" = "%lld%% · on battery";
 "Last hour avg: %.1f W" = "Last hour avg: %.1f W";
 "macOS estimate: %@" = "macOS estimate: %@";
 "Capacity" = "Capacity";
 "Health" = "Health";
+"Charge limit" = "Charge limit";
+"Charge limit: %d%%" = "Charge limit: %d%%";
+"%d%% · reached" = "%d%% · reached";
 "Cycles" = "Cycles";
 "%d h %d min" = "%1$d h %2$d min";
 "%d min" = "%d min";

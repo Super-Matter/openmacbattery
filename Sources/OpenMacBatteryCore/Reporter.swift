@@ -289,32 +289,43 @@ public final class Reporter {
     }
 
     /// Pildeyken battery_percent düşüş hızından gerçek ortalama watt çekişi.
-    /// `fullWh` = pilin tam dolu Wh kapasitesi.
-    /// Dönüş: (avgWatts, percentDropPerHour, samplesUsed) — yeterli düşüş yoksa nil.
+    /// Sleep/uyku araları ve gauge yükselmeleri hesaba katılmaz; yeterli geçmiş
+    /// yoksa nil döner.
     public func averageBatteryWatts(rangeSec: Int, fullWh: Double) throws -> (watts: Double, percentPerHour: Double, samples: Int)? {
         let now = Int64(Date().timeIntervalSince1970)
         let from = now - Int64(rangeSec)
         let sql = """
+        WITH battery AS (
+            SELECT timestamp, MAX(battery_percent) AS percent
+            FROM samples
+            WHERE timestamp BETWEEN ? AND ?
+              AND is_on_battery = 1
+              AND battery_percent IS NOT NULL
+            GROUP BY timestamp
+        ), pairs AS (
+            SELECT timestamp, percent,
+                   LEAD(timestamp) OVER (ORDER BY timestamp) AS next_timestamp,
+                   LEAD(percent) OVER (ORDER BY timestamp) AS next_percent
+            FROM battery
+        )
         SELECT
-            MIN(timestamp), MAX(timestamp),
-            (SELECT battery_percent FROM samples WHERE timestamp >= ? AND is_on_battery = 1 AND battery_percent IS NOT NULL ORDER BY timestamp ASC LIMIT 1),
-            (SELECT battery_percent FROM samples WHERE timestamp <= ? AND is_on_battery = 1 AND battery_percent IS NOT NULL ORDER BY timestamp DESC LIMIT 1),
-            COUNT(DISTINCT timestamp)
-        FROM samples
-        WHERE timestamp BETWEEN ? AND ? AND is_on_battery = 1 AND battery_percent IS NOT NULL;
+            COALESCE(SUM(CASE WHEN next_timestamp - timestamp BETWEEN 1 AND 300
+                                   AND next_percent < percent
+                              THEN percent - next_percent ELSE 0 END), 0),
+            COALESCE(SUM(CASE WHEN next_timestamp - timestamp BETWEEN 1 AND 300
+                              THEN next_timestamp - timestamp ELSE 0 END), 0),
+            COUNT(*)
+        FROM pairs;
         """
         let stmt = try db.prepare(sql); defer { stmt.finalize() }
         try stmt.bind(1, from); try stmt.bind(2, now)
-        try stmt.bind(3, from); try stmt.bind(4, now)
-        guard stmt.step(), !stmt.isNull(0), !stmt.isNull(1), !stmt.isNull(2), !stmt.isNull(3) else { return nil }
-        let tFirst = stmt.int64(0), tLast = stmt.int64(1)
-        let pFirst = stmt.int(2), pLast = stmt.int(3)
-        let count = Int(stmt.int64(4))
-        let dt = Double(tLast - tFirst)
-        guard dt >= 60 else { return nil }
-        let drop = Double(pFirst - pLast)   // pozitif = deşarj
-        guard drop > 0 else { return nil }   // şarjda veya rölantide
-        let percentPerHour = drop * 3600.0 / dt
+        guard stmt.step() else { return nil }
+        let drop = Double(stmt.int64(0))
+        let elapsed = stmt.int64(1)
+        let count = Int(stmt.int64(2))
+        // Require a meaningful window and at least ~2% gauge movement.
+        guard fullWh > 0, elapsed >= 1800, drop >= 2, count >= 10 else { return nil }
+        let percentPerHour = drop * 3600.0 / Double(elapsed)
         let watts = (percentPerHour / 100.0) * fullWh
         return (watts, percentPerHour, count)
     }

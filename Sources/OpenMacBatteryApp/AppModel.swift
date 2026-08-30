@@ -135,22 +135,20 @@ final class AppModel: ObservableObject {
     @Published var displayBrightnessPercent: Int? = nil
     @Published var batterySnapshot: BatterySnapshot? = nil
     @Published var avgWatts1h: Double? = nil              // son 1 saatlik ortalama gerçek W
+    @Published var adjustedRemainingMin: Int? = nil
     @Published var stats = DBStats()
     @Published var lastRefresh: Date = Date()
     @Published var loading: Bool = false
     @Published var errorMessage: String? = nil
 
     private var refreshTimer: Timer?
-    private var liveTimer: Timer?
-    private let liveRefreshInterval: TimeInterval = 60
 
     init() {
         // Timer closure'larında "weak self"i Task'a girmeden önce strong'a alıyoruz.
         // Swift 6 strict-concurrency, mutable captured self'in concurrent context'te
         // doğrudan kullanılmasına izin vermez; unwrap'leyince Task immutable constant kapatır.
-        startRefreshTimer()
         refreshLiveWatts()
-        startLiveTimer()
+        startRefreshTimer()
     }
 
     private func startRefreshTimer() {
@@ -161,39 +159,32 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private func startLiveTimer() {
-        liveTimer?.invalidate()
-        liveTimer = Timer.scheduledTimer(withTimeInterval: liveRefreshInterval, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            Task { @MainActor in self.refreshLiveWatts() }
-        }
-    }
-
     func setLiveMonitoring(_ enabled: Bool) {
         if enabled {
-            if refreshTimer == nil { startRefreshTimer() }
-            guard liveTimer == nil else { return }
+            guard refreshTimer == nil else { return }
             refreshLiveWatts()
-            startLiveTimer()
+            startRefreshTimer()
         } else {
             refreshTimer?.invalidate()
             refreshTimer = nil
-            liveTimer?.invalidate()
-            liveTimer = nil
         }
     }
 
-    /// IOPS okuması ucuz; per-app dağılım için ekstra DB query açmıyoruz —
-    /// mevcut `apps` state'indeki oranları kullanıyoruz. Sıfır wakeup, sıfır I/O.
+    /// Read only the live system and power-source values.
     func refreshLiveWatts() {
         let reading = PowerSourceReader.liveWatts()
         let display = PowerSourceReader.displayPowerEstimate()
         let brightness = display?.brightness.map { Int(($0 * 100).rounded()) }
         let snapshot = PowerSourceReader.batterySnapshot()
-        if liveWatts != reading { liveWatts = reading }
+        if liveWatts?.watts != reading?.watts
+            || liveWatts?.isCharging != reading?.isCharging
+            || liveWatts?.amperage_mA != reading?.amperage_mA
+            || liveWatts?.voltage_mV != reading?.voltage_mV {
+            liveWatts = reading
+        }
         if displayPowerWatts != display?.watts { displayPowerWatts = display?.watts }
         if displayBrightnessPercent != brightness { displayBrightnessPercent = brightness }
-        if batterySnapshot != snapshot { batterySnapshot = snapshot }
+        if !sameBatterySnapshot(batterySnapshot, snapshot) { batterySnapshot = snapshot }
         if let r = reading, r.watts > 0.1, totalUserEnergy > 0 {
             var dist: [String: Double] = [:]
             for app in apps where !app.isSystem {
@@ -204,11 +195,32 @@ final class AppModel: ObservableObject {
         } else if !liveAppWatts.isEmpty {
             liveAppWatts = [:]
         }
-        // Keep this path limited to live IOKit readings. Historical data is
-        // refreshed separately by the normal 60-second reload.
+    }
+
+    private func sameBatterySnapshot(_ lhs: BatterySnapshot?, _ rhs: BatterySnapshot?) -> Bool {
+        guard let lhs, let rhs else { return lhs == nil && rhs == nil }
+        return lhs.percent == rhs.percent
+            && lhs.isCharging == rhs.isCharging
+            && lhs.externalConnected == rhs.externalConnected
+            && lhs.designCapacity_mAh == rhs.designCapacity_mAh
+            && lhs.maxCapacity_mAh == rhs.maxCapacity_mAh
+            && lhs.currentCapacity_mAh == rhs.currentCapacity_mAh
+            && lhs.voltage_mV == rhs.voltage_mV
+            && lhs.amperage_mA == rhs.amperage_mA
+            && lhs.temperatureC == rhs.temperatureC
+            && lhs.macOsTimeRemainingMin == rhs.macOsTimeRemainingMin
+            && lhs.cycleCount == rhs.cycleCount
+            && lhs.serial == rhs.serial
+            && lhs.chargeLimitPercent == rhs.chargeLimitPercent
+            && lhs.adapterWatts == rhs.adapterWatts
+            && lhs.adapterVoltage_mV == rhs.adapterVoltage_mV
+            && lhs.adapterCurrent_mA == rhs.adapterCurrent_mA
+            && lhs.adapterIsWireless == rhs.adapterIsWireless
+            && lhs.lowPowerModeEnabled == rhs.lowPowerModeEnabled
     }
 
     func refreshNow() {
+        refreshLiveWatts()
         Task { await self.reload() }
     }
 
@@ -232,8 +244,23 @@ final class AppModel: ObservableObject {
                               end: Date(timeIntervalSince1970: TimeInterval($0.end)))
             }
             let bs = try reporter.batterySummary(range: r)
+            self.adjustedRemainingMin = nil
             if let snap = batterySnapshot, snap.fullWh > 0 {
-                self.avgWatts1h = (try? reporter.averageBatteryWatts(rangeSec: 3600, fullWh: snap.fullWh))?.watts
+                let observed = try? reporter.averageBatteryWatts(rangeSec: 3600, fullWh: snap.fullWh)
+                self.avgWatts1h = observed?.watts
+
+                if !snap.isCharging, snap.percent > 0, let observed {
+                    let remainingWh = snap.fullWh * Double(snap.percent) / 100.0
+                    let observedMin = remainingWh / observed.watts * 60.0
+                    if let systemMin = snap.macOsTimeRemainingMin, systemMin > 0 {
+                        // Let macOS react quickly to workload changes, while our
+                        // longer battery history smooths out gauge noise.
+                        let bounded = min(max(observedMin, Double(systemMin) * 0.5), Double(systemMin) * 2.0)
+                        self.adjustedRemainingMin = Int((Double(systemMin) * 0.75 + bounded * 0.25).rounded())
+                    } else {
+                        self.adjustedRemainingMin = Int(observedMin.rounded())
+                    }
+                }
             } else {
                 self.avgWatts1h = nil
             }

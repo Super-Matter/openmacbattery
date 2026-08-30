@@ -12,7 +12,7 @@ public struct PowerState {
 }
 
 /// Pil sağlığı + kapasite + macOS'un kalan süre tahmini.
-public struct BatterySnapshot: Equatable {
+public struct BatterySnapshot {
     public let percent: Int                // 0-100
     public let isCharging: Bool
     public let externalConnected: Bool     // adaptör takılı mı (şarj olmasa bile)
@@ -25,6 +25,7 @@ public struct BatterySnapshot: Equatable {
     public let macOsTimeRemainingMin: Int? // sistem tahmini (kaynaklı)
     public let cycleCount: Int
     public let serial: String?
+    public let chargeLimitPercent: Int?
     public let adapterWatts: Int?
     public let adapterVoltage_mV: Int?
     public let adapterCurrent_mA: Int?
@@ -48,7 +49,7 @@ public struct BatterySnapshot: Equatable {
 }
 
 /// Anlık güç çekişi (W). Pozitif = pildeyken çekiş, negatif = şarj olurken doluş.
-public struct LivePowerReading: Equatable {
+public struct LivePowerReading {
     public let watts: Double          // mutlak değer
     public let isCharging: Bool
     public let amperage_mA: Int       // ham
@@ -65,7 +66,7 @@ public struct LivePowerReading: Equatable {
     }
 }
 
-public struct DisplayPowerEstimate: Equatable {
+public struct DisplayPowerEstimate {
     public let watts: Double
     public let displayCount: Int
     public let brightness: Double?
@@ -209,10 +210,19 @@ public enum PowerSourceReader {
         let rawMax = (dict["AppleRawMaxCapacity"] as? Int) ?? 0
         let maxCap = rawMax > 0 ? rawMax : design
         let curRaw = (dict["AppleRawCurrentCapacity"] as? Int) ?? 0
-        let tRem = (dict["TimeRemaining"] as? Int).flatMap { $0 > 0 && $0 < 65535 ? $0 : nil }
+        func validTime(_ key: String) -> Int? {
+            guard let value = dict[key] as? Int, value > 0, value < 65535 else { return nil }
+            return value
+        }
+        let tRem = validTime(isCharging ? "AvgTimeToFull" : "AvgTimeToEmpty")
+            ?? validTime("TimeRemaining")
         let cycles = (dict["CycleCount"] as? Int) ?? 0
         let temp = Double((dict["Temperature"] as? Int) ?? 0) / 100.0
         let serial = dict["Serial"] as? String
+        let batteryData = dict["BatteryData"] as? [String: Any]
+        let chargeLimit = (batteryData?["DailyMaxSoc"] as? Int).flatMap {
+            (50...100).contains($0) ? $0 : nil
+        }
         let adapter = (dict["AdapterDetails"] as? [String: Any])
             ?? (dict["AppleRawAdapterDetails"] as? [String: Any])
 
@@ -229,6 +239,7 @@ public enum PowerSourceReader {
             macOsTimeRemainingMin: tRem,
             cycleCount: cycles,
             serial: serial,
+            chargeLimitPercent: chargeLimit,
             adapterWatts: adapter?["Watts"] as? Int,
             adapterVoltage_mV: adapter?["AdapterVoltage"] as? Int,
             adapterCurrent_mA: adapter?["Current"] as? Int,

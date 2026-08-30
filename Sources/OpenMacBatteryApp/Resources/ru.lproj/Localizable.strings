@@ -59,13 +59,21 @@
 /* Battery life card */
 "%lld%% · charging — full in %@" = "%lld%% · зарядка — до полного заряда: %@";
 "%lld%% · charging" = "%lld%% · заряжается";
+"%lld%% · charging to %lld%%" = "%1$lld%% · зарядка до %2$lld%%";
+"%lld%% · charging to %lld%% in %@" = "%1$lld%% · зарядка до %2$lld%% за %3$@";
 "%lld%% · plugged in (not charging)" = "%lld%% · подключено к сети (не заряжается)";
+"%lld%% · charge limit reached" = "%lld%% · достигнут лимит заряда";
+"%lld%% · %@ remaining" = "%1$lld%% · осталось %2$@";
+"%lld%% · ~%@ remaining" = "%1$lld%% · осталось примерно %2$@";
 "%lld%% · ~%@ of battery left" = "%lld%% · осталось примерно %@";
 "%lld%% · on battery" = "%lld%% · работа от батареи";
 "Last hour avg: %.1f W" = "Среднее потребление за последний час: %.1f Вт";
 "macOS estimate: %@" = "Оценка macOS: %@";
 "Capacity" = "Ёмкость";
 "Health" = "Состояние";
+"Charge limit" = "Лимит заряда";
+"Charge limit: %d%%" = "Лимит заряда: %d%%";
+"%d%% · reached" = "%d%% · достигнут";
 "Cycles" = "Циклы";
 "%d h %d min" = "%d ч %d мин";
 "%d min" = "%d мин";
