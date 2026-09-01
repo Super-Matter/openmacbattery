@@ -172,7 +172,6 @@
 "Per-app battery & energy tracker for macOS.\nFind out who's draining your battery — looking back, not just right now.\n\nData stays on this Mac. Nothing is sent over the network." = "Трекер батареи и энергопотребления приложений для macOS.\nУзнайте, какое приложение разряжает батарею — не только сейчас, но и за прошлый период.\n\nДанные остаются на этом Mac. Ничего не отправляется по сети.";
 "© 2026 — open source, free for personal use" = "© 2026 — открытый исходный код, бесплатно для личного использования";
 "OpenMacBattery Help" = "Справка OpenMacBattery";
-"OpenMacBattery Yardımı" = "Справка OpenMacBattery";
 "Tells you what's draining your battery and which app is responsible — looking back, not just right now. Activity Monitor only knows the present moment; OpenMacBattery remembers the past." = "Показывает, что разряжает батарею и какое приложение отвечает за это — не только сейчас, но и за прошлый период. Мониторинг системы показывает только текущий момент; OpenMacBattery хранит историю.";
 "Quick Start" = "Быстрый старт";
 "Quitting an app" = "Завершение приложения";

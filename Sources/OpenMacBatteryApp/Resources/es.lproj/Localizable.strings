@@ -20,6 +20,8 @@
 "Show system services" = "Mostrar servicios del sistema";
 "Settings…" = "Ajustes…";
 "Display options and settings" = "Opciones y ajustes";
+"Showing measurements taken while on battery — click to include all" = "Mostrando las mediciones con batería — haz clic para incluirlas todas";
+"Showing all measurements — click to filter to battery only" = "Mostrando todas las mediciones — haz clic para filtrar solo con batería";
 "Battery details (⌥⌘B)" = "Detalles de batería (⌥⌘B)";
 
 /* Sidebar */
