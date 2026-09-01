@@ -3,11 +3,12 @@ import OpenMacBatteryCore
 
 /// Apple → Battery Details… and toolbar button popover.
 struct BatteryDetailsView: View {
-    @EnvironmentObject var model: AppModel
     var compact: Bool = true
+    @ObservedObject var live: LiveState
+    let refresh: () -> Void
 
     var body: some View {
-        let snap = model.batterySnapshot
+        let snap = live.batterySnapshot
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 BatteryGlyph(
@@ -62,7 +63,7 @@ struct BatteryDetailsView: View {
                 Text("Refreshes every 60 seconds")
                     .font(.caption2).foregroundStyle(.secondary)
                 Spacer()
-                Button("Refresh now") { model.refreshLiveWatts() }
+                Button("Refresh now") { refresh() }
                     .controlSize(.small)
             }
             .padding(.horizontal, 16).padding(.vertical, 10)

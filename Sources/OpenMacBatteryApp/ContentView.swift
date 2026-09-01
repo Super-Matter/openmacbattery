@@ -53,7 +53,7 @@ struct MainToolbar: ToolbarContent {
             .help("Display options and settings")
         }
         ToolbarItem(placement: .primaryAction) {
-            BatteryDetailsToolbarButton(model: model)
+            BatteryDetailsToolbarButton(live: model.live, refresh: { model.refreshLiveWatts() })
         }
         ToolbarItem(placement: .primaryAction) {
             RefreshRingButton(model: model)
@@ -127,7 +127,8 @@ struct EmptySidebar: View {
 }
 
 struct BatteryDetailsToolbarButton: View {
-    @ObservedObject var model: AppModel
+    @ObservedObject var live: LiveState
+    let refresh: () -> Void
     @State private var showPopover: Bool = false
 
     var body: some View {
@@ -137,7 +138,7 @@ struct BatteryDetailsToolbarButton: View {
             HStack(spacing: 4) {
                 Image(systemName: iconName)
                     .foregroundStyle(iconColor)
-                if let s = model.batterySnapshot {
+                if let s = live.batterySnapshot {
                     Text("\(s.percent)%")
                         .font(.system(size: 12, weight: .medium))
                         .monospacedDigit()
@@ -149,13 +150,12 @@ struct BatteryDetailsToolbarButton: View {
         }
         .help("Battery details (⌥⌘B)")
         .popover(isPresented: $showPopover, arrowEdge: .bottom) {
-            BatteryDetailsView(compact: true)
-                .environmentObject(model)
+            BatteryDetailsView(compact: true, live: live, refresh: refresh)
         }
     }
 
     private var iconName: String {
-        guard let s = model.batterySnapshot else { return "battery.0" }
+        guard let s = live.batterySnapshot else { return "battery.0" }
         if s.isCharging { return "battery.100.bolt" }
         if s.percent >= 75 { return "battery.100" }
         if s.percent >= 50 { return "battery.75" }
@@ -164,7 +164,7 @@ struct BatteryDetailsToolbarButton: View {
         return "battery.0"
     }
     private var iconColor: Color {
-        guard let s = model.batterySnapshot else { return .secondary }
+        guard let s = live.batterySnapshot else { return .secondary }
         if s.isCharging { return .blue }
         if s.percent <= 10 { return .red }
         if s.percent <= 25 { return .orange }
@@ -392,12 +392,17 @@ struct DetailView: View {
         } else if let id = model.selectedAppId,
                   let app = model.apps.first(where: { $0.id == id }) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    LiveWattCard()
-                    BatteryLifeCard()
+                LazyVStack(alignment: .leading, spacing: 16) {
+                    LiveWattCard(apps: model.apps, live: model.live)
+                    BatteryLifeCard(avgWatts1h: model.avgWatts1h,
+                                    adjustedRemainingMin: model.adjustedRemainingMin,
+                                    live: model.live)
                     HeroCard()
                     CompareCard()
-                    OnBatteryTipCard(app: app)
+                    OnBatteryTipCard(app: app,
+                                     onBattery: model.onBattery,
+                                     sharePercent: model.sharePercent(of: app),
+                                     live: model.live)
                     AppHeader(app: app)
                     SummaryCards(app: app)
                     NarrativeCard(app: app)
@@ -414,10 +419,11 @@ struct DetailView: View {
 }
 
 struct LiveWattCard: View {
-    @EnvironmentObject var model: AppModel
+    let apps: [GroupedApp]
+    @ObservedObject var live: LiveState
 
     var body: some View {
-        if let r = model.liveWatts {
+        if let r = live.liveWatts {
             HStack(spacing: 14) {
                 ZStack {
                     Circle()
@@ -437,16 +443,16 @@ struct LiveWattCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(headline).font(.headline)
                     Text(subtext).font(.caption).foregroundStyle(.secondary)
-                    if let displayWatts = model.displayPowerWatts {
+                    if let displayWatts = live.displayPowerWatts {
                         Text(String(format: NSLocalizedString("Display (estimated): %.1f W", comment: ""), displayWatts))
                             .font(.caption2).foregroundStyle(.secondary)
                     }
-                    if let brightness = model.displayBrightnessPercent {
+                    if let brightness = live.displayBrightnessPercent {
                         Text(String(format: NSLocalizedString("Brightness: %d%%", comment: ""), brightness))
                             .font(.caption2).foregroundStyle(.secondary)
                     }
-                    if let adapterWatts = model.batterySnapshot?.adapterWatts,
-                       model.batterySnapshot?.externalConnected == true {
+                    if let adapterWatts = live.batterySnapshot?.adapterWatts,
+                       live.batterySnapshot?.externalConnected == true {
                         Text(String(format: NSLocalizedString("Adapter: %d W", comment: ""), adapterWatts))
                             .font(.caption2).foregroundStyle(.secondary)
                     }
@@ -471,14 +477,14 @@ struct LiveWattCard: View {
     }
 
     private var color: Color {
-        guard let r = model.liveWatts else { return .accentColor }
+        guard let r = live.liveWatts else { return .accentColor }
         if r.isCharging { return .blue }
         if r.watts > 15 { return .red }
         if r.watts > 7 { return .orange }
         return .green
     }
     private var headline: String {
-        guard let r = model.liveWatts else { return "" }
+        guard let r = live.liveWatts else { return "" }
         let watts = String(format: "%.1f", r.watts)
         if r.isCharging {
             return String(format: NSLocalizedString("Battery charging: ~%@ W", comment: ""), watts)
@@ -486,26 +492,28 @@ struct LiveWattCard: View {
         return String(format: NSLocalizedString("Battery draw: ~%@ W", comment: ""), watts)
     }
     private var subtext: String {
-        guard let r = model.liveWatts else { return "" }
+        guard let r = live.liveWatts else { return "" }
         return "\(r.amperage_mA) mA · \(String(format: "%.2f", Double(r.voltage_mV)/1000)) V"
     }
     private var top3: [(String, String, Double)] {
-        let sorted = model.liveAppWatts
+        let sorted = live.liveAppWatts
             .filter { $0.value >= 0.1 }
             .sorted(by: { $0.value > $1.value })
             .prefix(3)
         return sorted.compactMap { (id, w) in
-            guard let app = model.apps.first(where: { $0.id == id }) else { return nil }
+            guard let app = apps.first(where: { $0.id == id }) else { return nil }
             return (id, app.displayName, w)
         }
     }
 }
 
 struct BatteryLifeCard: View {
-    @EnvironmentObject var model: AppModel
+    let avgWatts1h: Double?
+    let adjustedRemainingMin: Int?
+    @ObservedObject var live: LiveState
 
     var body: some View {
-        if let snap = model.batterySnapshot {
+        if let snap = live.batterySnapshot {
             HStack(spacing: 16) {
                 BatteryGlyph(percent: snap.percent, isCharging: snap.isCharging)
                     .frame(width: 56, height: 30)
@@ -565,7 +573,7 @@ struct BatteryLifeCard: View {
             }
             return String(format: NSLocalizedString("%lld%% · plugged in (not charging)", comment: ""), snap.percent)
         }
-        if let adjusted = model.adjustedRemainingMin, adjusted > 0 {
+        if let adjusted = adjustedRemainingMin, adjusted > 0 {
             return String(format: NSLocalizedString("%lld%% · ~%@ remaining", comment: ""), snap.percent, formatMinutes(adjusted))
         }
         if let m = snap.macOsTimeRemainingMin, m > 0 {
@@ -576,10 +584,10 @@ struct BatteryLifeCard: View {
 
     private func subtext(snap: BatterySnapshot) -> String? {
         var parts: [String] = []
-        if !snap.isCharging, let w = model.avgWatts1h {
+        if !snap.isCharging, let w = avgWatts1h {
             parts.append(String(format: NSLocalizedString("Last hour avg: %.1f W", comment: ""), w))
         }
-        if let adjusted = model.adjustedRemainingMin,
+        if let adjusted = adjustedRemainingMin,
            let system = snap.macOsTimeRemainingMin,
            adjusted != system {
             parts.append(String(format: NSLocalizedString("macOS estimate: %@", comment: ""), formatMinutes(system)))
@@ -775,7 +783,9 @@ struct CompareCard: View {
 
 struct OnBatteryTipCard: View {
     let app: GroupedApp
-    @EnvironmentObject var model: AppModel
+    let onBattery: Bool
+    let sharePercent: Double
+    @ObservedObject var live: LiveState
     var body: some View {
         if shouldShow {
             HStack(spacing: 12) {
@@ -803,15 +813,15 @@ struct OnBatteryTipCard: View {
         }
     }
     private var isOnBatteryNow: Bool {
-        guard let snapshot = model.batterySnapshot else { return false }
+        guard let snapshot = live.batterySnapshot else { return false }
         return !snapshot.isCharging && !snapshot.externalConnected
     }
     private var shouldShow: Bool {
-        guard isOnBatteryNow, model.onBattery else { return false }
+        guard isOnBatteryNow, onBattery else { return false }
         return app.level == .high && !app.isSystem
     }
     private var headline: String {
-        let p = Int(model.sharePercent(of: app).rounded())
+        let p = Int(sharePercent.rounded())
         return String(format: NSLocalizedString("You're on battery — %@ is using %lld%% of app energy", comment: ""), app.displayName, p)
     }
 }
@@ -975,8 +985,8 @@ struct EnergyTimelineCard: View {
             }
         }
     }
-    private var rangeEnd: Date { Date() }
-    private var rangeStart: Date { Date().addingTimeInterval(-Double(model.range.seconds)) }
+    private var rangeEnd: Date { model.lastRefresh }
+    private var rangeStart: Date { model.lastRefresh.addingTimeInterval(-Double(model.range.seconds)) }
 }
 
 struct BatteryTimelineCard: View {
@@ -1024,8 +1034,8 @@ struct BatteryTimelineCard: View {
             }
         }
     }
-    private var rangeEnd: Date { Date() }
-    private var rangeStart: Date { Date().addingTimeInterval(-Double(model.range.seconds)) }
+    private var rangeEnd: Date { model.lastRefresh }
+    private var rangeStart: Date { model.lastRefresh.addingTimeInterval(-Double(model.range.seconds)) }
 }
 
 struct TopBarCard: View {

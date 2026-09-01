@@ -27,6 +27,7 @@ struct OpenMacBatteryApp: App {
         Window("OpenMacBattery", id: "main") {
             ContentView()
                 .environmentObject(model)
+                .environmentObject(model.live)
                 .frame(minWidth: 900, minHeight: 600)
                 .onAppear { model.refreshNow() }
                 .onChange(of: scenePhase) { _, phase in
@@ -65,8 +66,11 @@ struct OpenMacBatteryApp: App {
         .windowResizability(.contentSize)
 
         Window("Battery Details", id: "batteryDetails") {
-            BatteryDetailsView(compact: false)
-                .environmentObject(model)
+            BatteryDetailsView(
+                compact: false,
+                live: model.live,
+                refresh: { model.refreshLiveWatts() }
+            )
         }
         .windowResizability(.contentSize)
     }
@@ -83,7 +87,7 @@ struct SettingsMenuItem: View {
     }
 }
 
-/// CommandGroup içinden SwiftUI'nin openWindow Environment'ını kullanmak için ufak bir View.
+/// Menu command item that opens the help window.
 struct HelpMenuItem: View {
     @Environment(\.openWindow) private var openWindow
     var body: some View {

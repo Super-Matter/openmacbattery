@@ -123,6 +123,15 @@ struct AppAnomaly {
 }
 
 @MainActor
+final class LiveState: ObservableObject {
+    @Published var liveWatts: LivePowerReading? = nil
+    @Published var liveAppWatts: [String: Double] = [:]
+    @Published var displayPowerWatts: Double? = nil
+    @Published var displayBrightnessPercent: Int? = nil
+    @Published var batterySnapshot: BatterySnapshot? = nil
+}
+
+@MainActor
 final class AppModel: ObservableObject {
     @Published var range: TimeRange = .h24 { didSet { refreshNow() } }
     @Published var onBattery: Bool = false { didSet { refreshNow() } }
@@ -138,11 +147,7 @@ final class AppModel: ObservableObject {
     @Published var narrative: AppNarrative? = nil
     @Published var compare = PeriodCompare(currentTotalEnergy: 0, previousTotalEnergy: 0, hasPrevious: false)
     @Published var anomalies: [String: AppAnomaly] = [:]
-    @Published var liveWatts: LivePowerReading? = nil
-    @Published var liveAppWatts: [String: Double] = [:]   // app id → estimated W
-    @Published var displayPowerWatts: Double? = nil
-    @Published var displayBrightnessPercent: Int? = nil
-    @Published var batterySnapshot: BatterySnapshot? = nil
+    let live = LiveState()
     @Published var avgWatts1h: Double? = nil              // son 1 saatlik ortalama gerçek W
     @Published var adjustedRemainingMin: Int? = nil
     @Published var stats = DBStats()
@@ -211,15 +216,15 @@ final class AppModel: ObservableObject {
         let display = PowerSourceReader.displayPowerEstimate()
         let brightness = display?.brightness.map { Int(($0 * 100).rounded()) }
         let snapshot = PowerSourceReader.batterySnapshot()
-        if liveWatts?.watts != reading?.watts
-            || liveWatts?.isCharging != reading?.isCharging
-            || liveWatts?.amperage_mA != reading?.amperage_mA
-            || liveWatts?.voltage_mV != reading?.voltage_mV {
-            liveWatts = reading
+        if live.liveWatts?.watts != reading?.watts
+            || live.liveWatts?.isCharging != reading?.isCharging
+            || live.liveWatts?.amperage_mA != reading?.amperage_mA
+            || live.liveWatts?.voltage_mV != reading?.voltage_mV {
+            live.liveWatts = reading
         }
-        if displayPowerWatts != display?.watts { displayPowerWatts = display?.watts }
-        if displayBrightnessPercent != brightness { displayBrightnessPercent = brightness }
-        if !sameBatterySnapshot(batterySnapshot, snapshot) { batterySnapshot = snapshot }
+        if live.displayPowerWatts != display?.watts { live.displayPowerWatts = display?.watts }
+        if live.displayBrightnessPercent != brightness { live.displayBrightnessPercent = brightness }
+        if !sameBatterySnapshot(live.batterySnapshot, snapshot) { live.batterySnapshot = snapshot }
         let allocationTotal = apps.reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
         if let r = reading, r.watts > 0.1, allocationTotal > 0 {
             var dist: [String: Double] = [:]
@@ -227,9 +232,9 @@ final class AppModel: ObservableObject {
                 let frac = Double(max(app.energyRaw, 0)) / Double(allocationTotal)
                 dist[app.id] = frac * r.watts
             }
-            if liveAppWatts != dist { liveAppWatts = dist }
-        } else if !liveAppWatts.isEmpty {
-            liveAppWatts = [:]
+            if live.liveAppWatts != dist { live.liveAppWatts = dist }
+        } else if !live.liveAppWatts.isEmpty {
+            live.liveAppWatts = [:]
         }
     }
 
@@ -267,7 +272,7 @@ final class AppModel: ObservableObject {
         let bucketSeconds = range.bucketSeconds
         let onBattery = onBattery
         let showSystem = showSystem
-        let snapshot = batterySnapshot
+        let snapshot = live.batterySnapshot
         reloadTask = Task { [weak self] in
             do {
                 let data = try await Task.detached(priority: .utility) {
