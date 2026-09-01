@@ -33,6 +33,23 @@ I'm releasing it because once it worked for me, there was no reason to keep it p
 
 — Murat Dugan
 
+## Current source vs v0.1
+
+The original `v0.1` tag is the initial prototype. The current source has since become a more accurate, safer, and lower-overhead release candidate:
+
+| Area | Current source |
+| --- | --- |
+| Energy | Uses macOS's native `ri_energy_nj` process counter; processor energy is shown in joules and is kept separate from total battery drain. |
+| Attribution | Fixes PID enumeration, PID-reuse identity (including microseconds), current-user filtering, permission gaps, timestamp gaps, and native-energy fallbacks. |
+| Battery reporting | Adds battery-only filtering throughout the UI, battery/AC duration scaling, charge-limit and adapter details, remaining-time correction, brightness detection, and clearly labeled display-power estimates. |
+| Data integrity | Failed SQLite writes surface errors, sampler baselines commit only after successful writes, migrations are retry-safe, and hourly aggregation is gap-aware and idempotent. |
+| Retention | Keeps 30 days of raw samples and 180 days of hourly aggregates, with progress tracking for aggregation. |
+| GUI performance | Database work runs off the main actor, inactive polling stops, live and history state are separated, charts use stable IDs, detail content is lazy, live values refresh every 60 seconds, and history refreshes every 5 minutes. |
+| UI and localization | Adds per-app processor-energy values in joules, comparison/anomaly explanations, ⌘, Settings, and updated translations in all 9 locales. |
+| CLI and packaging | Adds input validation, safe JSON escaping, clearer diagnostics, a self-contained signed `.app`, and a drag-to-install DMG build. |
+
+The release DMG is built directly from the current source tree; it is not the old `v0.1` prototype.
+
 ## Privacy
 
 - **Zero network code.** No telemetry, no analytics, no cloud sync. Verify yourself: `grep -r "URLSession\|http\|socket" Sources/`.
@@ -47,7 +64,7 @@ I'm releasing it because once it worked for me, there was no reason to keep it p
 
 ## Download
 
-**[⬇ Latest release (DMG)](https://github.com/MuratDugan/openmacbattery/releases/latest)**
+**[⬇ Latest release (DMG)](https://github.com/Super-Matter/openmacbattery/releases/latest)**
 
 1. Download `OpenMacBattery-x.y.dmg`
 2. Open it, drag **OpenMacBattery** onto **Applications**
@@ -62,7 +79,7 @@ Done. Data starts accumulating within 1–2 minutes.
 If you'd rather compile yourself:
 
 ```bash
-git clone https://github.com/MuratDugan/openmacbattery.git
+git clone https://github.com/Super-Matter/openmacbattery.git
 cd openmacbattery
 ./scripts/make-app.sh --install   # builds and installs to /Applications
 # or
@@ -86,9 +103,10 @@ The SQLite database uses WAL mode + `auto_vacuum=INCREMENTAL`. Hourly aggregates
 OpenMacBattery is deliberately quiet when idle:
 
 - The background sampler runs at low priority every 60 seconds, samples only the current user's processes, batches SQLite writes in a transaction, and self-throttles to 120 seconds if a sample takes too long.
-- The GUI uses one 60-second refresh path for live wattage, battery, adapter, brightness, and history. The toolbar refresh button is manual and has no animation timer.
-- GUI polling stops while the app is inactive, and unchanged readings do not trigger SwiftUI updates.
-- Brightness and display power are read only during the same refresh; display power remains an estimate because macOS does not expose a public watt meter.
+- The GUI refreshes live wattage and battery state every 60 seconds; the heavier history/chart reload runs every 5 minutes.
+- GUI polling stops while the app is inactive, and live state is separated from history state so live changes do not invalidate history charts.
+- Chart points keep stable identities and detail content is lazy, avoiding needless chart teardown and off-screen work.
+- Brightness and display power remain estimates because macOS does not expose a public watt meter.
 
 A representative idle measurement on an M1 MacBook Air using `powermetrics` showed the GUI at `0.33 CPU ms/s` with `0.01` Energy Impact and the daemon at `0.01 CPU ms/s` with `0.00` Energy Impact. A pre-optimization sample showed `211.20 CPU ms/s` and `32.35` Energy Impact for the GUI. These are device- and workload-dependent samples, not guarantees.
 
@@ -160,7 +178,7 @@ rm -f "$HOME/Library/Logs/openmacbattery.log" \
 | **"App can't be opened, unidentified developer"** on first launch | Right-click the `.app` → **Open** → **Open**. macOS remembers this for next time. Standard for ad-hoc signed apps. |
 | **Sidebar empty after install** | Daemon needs ≥ 2 minutes to compute the first deltas. Check with `openmacbattery daemon status`. |
 | **No data accumulating** | Open **Settings** in the app and confirm *Background tracking* is **On**. If off, toggle it. |
-| **GUI looks stale** | Click the refresh button in the toolbar (top right) or press ⌘R. Live wattage and history update every 60 s. |
+| **GUI looks stale** | Click the refresh button in the toolbar (top right) or press ⌘R. Live wattage updates every 60 s; history updates every 5 minutes. |
 | **Energy values look strange** | Energy uses macOS's native `ri_energy_nj` counter on supported Apple Silicon Macs. Restart sampling after an update and allow at least two samples for new data. |
 | **Can't quit a system service from the right-click menu** | By design — system services (root-owned, sandboxed Apple daemons) can't be terminated by user-level processes. Use Activity Monitor with admin privileges if you really need to. |
 | **Reset everything** | Remove the database at `~/Library/Application Support/OpenMacBattery/data.db` and restart the daemon. |
@@ -201,4 +219,4 @@ Inspired by [Stats](https://github.com/exelban/stats), [htop](https://htop.dev/)
 
 ## Status
 
-**v0.1 — early preview.** The data layer, daemon, GUI, and i18n are functional. Needs more testing on diverse Mac configurations and native-speaker review of translations.
+**v0.2.0 — early preview.** The data layer, daemon, GUI, and i18n are functional. Needs more testing on diverse Mac configurations and native-speaker review of translations.
