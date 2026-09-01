@@ -53,18 +53,18 @@ enum TimeRange: String, CaseIterable, Identifiable {
     }
 }
 
-struct TimelineSample: Identifiable {
-    let id = UUID()
+struct TimelineSample: Identifiable, Equatable {
     let date: Date
     let energyRaw: Int64
     let cpuNs: Int64
+    var id: Date { date }
 }
 
-struct BatterySample: Identifiable {
-    let id = UUID()
+struct BatterySample: Identifiable, Equatable {
     let date: Date
     let percent: Double
     let onBattery: Bool
+    var id: Date { date }
 }
 
 struct DBStats {
@@ -75,10 +75,10 @@ struct DBStats {
     var calibrationFactor: Double? = nil
 }
 
-struct SleepInterval: Identifiable {
-    let id = UUID()
+struct SleepInterval: Identifiable, Equatable {
     let start: Date
     let end: Date
+    var id: Date { start }
 }
 
 struct HeroSummary {
@@ -150,10 +150,13 @@ final class AppModel: ObservableObject {
     @Published var loading: Bool = false
     @Published var errorMessage: String? = nil
 
+    // ponytail: history can lag 5 minutes; shorten if minute-level chart updates matter.
+    private static let historyRefreshInterval: TimeInterval = 5 * 60
     private var refreshTimer: Timer?
     private var reloadTask: Task<Void, Never>?
     private var detailTask: Task<Void, Never>?
     private var reloadGeneration = 0
+    private var lastHistoryRefresh = Date.distantPast
 
     private struct ReloadData {
         let apps: [GroupedApp]
@@ -181,7 +184,13 @@ final class AppModel: ObservableObject {
         refreshTimer?.invalidate()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             guard let self else { return }
-            Task { @MainActor in self.refreshNow() }
+            Task { @MainActor in
+                if Date().timeIntervalSince(self.lastHistoryRefresh) >= Self.historyRefreshInterval {
+                    self.refreshNow()
+                } else {
+                    self.refreshLiveWatts()
+                }
+            }
         }
     }
 
@@ -248,6 +257,7 @@ final class AppModel: ObservableObject {
 
     func refreshNow() {
         refreshLiveWatts()
+        lastHistoryRefresh = Date()
         reloadGeneration += 1
         let generation = reloadGeneration
         reloadTask?.cancel()
@@ -469,8 +479,10 @@ final class AppModel: ObservableObject {
                       self.selectedAppId == id,
                       self.range.seconds == seconds,
                       self.onBattery == onBattery else { return }
-                self.detailTimeline = points
-                self.narrative = self.computeNarrative(samples: points, bucketSec: bucketSeconds)
+                if self.detailTimeline != points {
+                    self.detailTimeline = points
+                    self.narrative = self.computeNarrative(samples: points, bucketSec: bucketSeconds)
+                }
             } catch {
                 guard !Task.isCancelled, let self else { return }
                 self.errorMessage = String(format: NSLocalizedString("Could not read details: %@", comment: ""), "\(error)")
