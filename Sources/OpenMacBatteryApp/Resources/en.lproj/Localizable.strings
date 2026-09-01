@@ -92,14 +92,24 @@
 "battery %lld%% → %lld%%" = "battery %1$lld%% → %2$lld%%";
 
 /* Compare card */
-"Compared to the previous %@" = "Compared to the previous %@";
+"Compared with %@" = "Compared with %@";
 "Need a bit more data to compare with previous period" = "Need a bit more data to compare with previous period";
-"%lld%% less battery used than the previous %@" = "%1$lld%% less battery used than the previous %2$@";
-"%lld%% more battery used than the previous %@" = "%1$lld%% more battery used than the previous %2$@";
-"Similar to the previous %@ (%lld%% difference)" = "Similar to the previous %1$@ (%2$lld%% difference)";
+"%lld%% less app energy than %@" = "%1$lld%% less app energy than %2$@";
+"%lld%% more app energy than %@" = "%1$lld%% more app energy than %2$@";
+"Similar app energy to %@ (%lld%% difference)" = "Similar app energy to %1$@ (%2$lld%% difference)";
+"the previous hour" = "the previous hour";
+"the previous 6 hours" = "the previous 6 hours";
+"the previous 24 hours" = "the previous 24 hours";
+"the previous week" = "the previous week";
+"the previous month" = "the previous month";
 
 /* Tip card */
-"You're on battery — %@ is using %lld%% of your battery load" = "You're on battery — %1$@ is using %2$lld%% of your battery load";
+"You're on battery — %@ is using %lld%% of app energy" = "You're on battery — %1$@ is using %2$lld%% of app energy";
+"Battery draw: ~%@ W" = "Battery draw: ~%@ W";
+"10×+ usual" = "10×+ usual";
+"%.0f× usual" = "%.0f× usual";
+"Could not read data: %@" = "Could not read data: %@";
+"Could not read details: %@" = "Could not read details: %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "If it doesn't need to run in the background while on battery, consider quitting it.";
 
 /* Narrative card */
@@ -114,7 +124,9 @@
 "System" = "System";
 
 /* Summary cards */
-"Battery share" = "Battery share";
+"Energy share" = "Energy share";
+"Share of battery-only app energy" = "Share of battery-only app energy";
+"Share of all app energy" = "Share of all app energy";
 "CPU time" = "CPU time";
 "Wakeups" = "Wakeups";
 

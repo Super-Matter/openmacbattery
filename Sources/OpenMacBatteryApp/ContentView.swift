@@ -71,11 +71,15 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text(String(format: NSLocalizedString("%lld apps", comment: ""), model.apps.count))
-                    .font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Text(model.range.displayName).font(.caption).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(String(format: NSLocalizedString("%lld apps", comment: ""), model.apps.count))
+                        .font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(model.range.displayName).font(.caption).foregroundStyle(.secondary)
+                }
+                Text(model.onBattery ? "Share of battery-only app energy" : "Share of all app energy")
+                    .font(.caption2).foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
@@ -482,7 +486,7 @@ struct LiveWattCard: View {
         if r.isCharging {
             return String(format: NSLocalizedString("Battery charging: ~%@ W", comment: ""), watts)
         }
-        return String(format: NSLocalizedString("Total draw: %@ W", comment: ""), watts)
+        return String(format: NSLocalizedString("Battery draw: ~%@ W", comment: ""), watts)
     }
     private var subtext: String {
         guard let r = model.liveWatts else { return "" }
@@ -506,7 +510,7 @@ struct BatteryLifeCard: View {
     var body: some View {
         if let snap = model.batterySnapshot {
             HStack(spacing: 16) {
-                BatteryGlyph(percent: snap.percent, isCharging: snap.isCharging || snap.externalConnected)
+                BatteryGlyph(percent: snap.percent, isCharging: snap.isCharging)
                     .frame(width: 56, height: 30)
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -740,7 +744,7 @@ struct CompareCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(headline(delta: delta))
                         .font(.system(size: 13, weight: .medium))
-                    Text(String(format: NSLocalizedString("Compared to the previous %@", comment: ""), NSLocalizedString(model.range.displayKey, comment: "")))
+                    Text(String(format: NSLocalizedString("Compared with %@", comment: ""), NSLocalizedString(model.range.previousPeriodKey, comment: "")))
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -761,14 +765,14 @@ struct CompareCard: View {
     }
     private func headline(delta: Double) -> String {
         let absVal = Int(delta.magnitude.rounded())
-        let cmp = NSLocalizedString(model.range.displayKey, comment: "")
+        let period = NSLocalizedString(model.range.previousPeriodKey, comment: "")
         if delta < -5 {
-            return String(format: NSLocalizedString("%lld%% less battery used than the previous %@", comment: ""), absVal, cmp)
+            return String(format: NSLocalizedString("%lld%% less app energy than %@", comment: ""), absVal, period)
         }
         if delta > 5 {
-            return String(format: NSLocalizedString("%lld%% more battery used than the previous %@", comment: ""), absVal, cmp)
+            return String(format: NSLocalizedString("%lld%% more app energy than %@", comment: ""), absVal, period)
         }
-        return String(format: NSLocalizedString("Similar to the previous %@ (%lld%% difference)", comment: ""), cmp, absVal)
+        return String(format: NSLocalizedString("Similar app energy to %@ (%lld%% difference)", comment: ""), period, absVal)
     }
 }
 
@@ -802,16 +806,16 @@ struct OnBatteryTipCard: View {
         }
     }
     private var isOnBatteryNow: Bool {
-        guard let recent = model.batteryTimeline.last else { return false }
-        return recent.onBattery
+        guard let snapshot = model.batterySnapshot else { return false }
+        return !snapshot.isCharging && !snapshot.externalConnected
     }
     private var shouldShow: Bool {
-        guard isOnBatteryNow else { return false }
+        guard isOnBatteryNow, model.onBattery else { return false }
         return app.level == .high && !app.isSystem
     }
     private var headline: String {
         let p = Int(model.sharePercent(of: app).rounded())
-        return String(format: NSLocalizedString("You're on battery — %@ is using %lld%% of your battery load", comment: ""), app.displayName, p)
+        return String(format: NSLocalizedString("You're on battery — %@ is using %lld%% of app energy", comment: ""), app.displayName, p)
     }
 }
 
@@ -908,7 +912,7 @@ struct SummaryCards: View {
     @EnvironmentObject var model: AppModel
     var body: some View {
         HStack(spacing: 12) {
-            StatCard(label: "Battery share", value: shareString, accent: Color(app.level.color))
+            StatCard(label: "Energy share", value: shareString, accent: Color(app.level.color))
             StatCard(label: "CPU time", value: EnergyFormatter.formatCpuNs(app.cpuNs))
             StatCard(label: "Wakeups", value: EnergyFormatter.formatCount(app.wakeups))
             StatCard(label: "Range", value: rangeText)

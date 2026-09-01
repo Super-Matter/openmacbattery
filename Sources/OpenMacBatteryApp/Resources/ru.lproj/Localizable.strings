@@ -92,14 +92,24 @@
 "battery %lld%% → %lld%%" = "батарея: %1$lld%% → %2$lld%%";
 
 /* Compare card */
-"Compared to the previous %@" = "По сравнению с предыдущим периодом %@";
+"Compared with %@" = "По сравнению с %@";
 "Need a bit more data to compare with previous period" = "Нужно немного больше данных для сравнения с предыдущим периодом";
-"%lld%% less battery used than the previous %@" = "На %1$lld%% меньше расход батареи, чем за предыдущий %@";
-"%lld%% more battery used than the previous %@" = "На %1$lld%% больше расход батареи, чем за предыдущий %@";
-"Similar to the previous %@ (%lld%% difference)" = "Похоже на предыдущий %@ (разница %2$lld%%)";
+"%lld%% less app energy than %@" = "На %1$lld%% меньше энергопотребление приложений, чем за %2$@";
+"%lld%% more app energy than %@" = "На %1$lld%% больше энергопотребление приложений, чем за %2$@";
+"Similar app energy to %@ (%lld%% difference)" = "Энергопотребление приложений похоже на %1$@ (разница %2$lld%%)";
+"the previous hour" = "предыдущий час";
+"the previous 6 hours" = "предыдущие 6 часов";
+"the previous 24 hours" = "предыдущие 24 часа";
+"the previous week" = "предыдущую неделю";
+"the previous month" = "предыдущий месяц";
 
 /* Tip card */
-"You're on battery — %@ is using %lld%% of your battery load" = "Вы работаете от батареи — на %@ приходится %2$lld%% нагрузки батареи";
+"You're on battery — %@ is using %lld%% of app energy" = "Вы работаете от батареи — на %@ приходится %2$lld%% энергопотребления приложений";
+"Battery draw: ~%@ W" = "Потребление от батареи: ~%@ Вт";
+"10×+ usual" = "в 10 и более раз обычно";
+"%.0f× usual" = "в %.0f раз обычно";
+"Could not read data: %@" = "Не удалось прочитать данные: %@";
+"Could not read details: %@" = "Не удалось прочитать сведения: %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "Если приложению не нужно работать в фоне от батареи, рассмотрите возможность его завершения.";
 
 /* Narrative card */
@@ -114,7 +124,9 @@
 "System" = "Система";
 
 /* Summary cards */
-"Battery share" = "Доля расхода батареи";
+"Energy share" = "Доля энергопотребления";
+"Share of battery-only app energy" = "Доля энергопотребления приложений от батареи";
+"Share of all app energy" = "Доля общего энергопотребления приложений";
 "CPU time" = "Время ЦП";
 "Wakeups" = "Пробуждения";
 

@@ -93,9 +93,8 @@ struct ExportCommand: ParsableCommand {
     }
     private func jsonStr(_ s: String?) -> String {
         guard let s else { return "null" }
-        let esc = s.replacingOccurrences(of: "\\", with: "\\\\")
-                   .replacingOccurrences(of: "\"", with: "\\\"")
-                   .replacingOccurrences(of: "\n", with: "\\n")
-        return "\"\(esc)\""
+        guard let data = try? JSONSerialization.data(withJSONObject: [s]),
+              let json = String(data: data, encoding: .utf8) else { return "null" }
+        return String(json.dropFirst().dropLast())
     }
 }

@@ -79,7 +79,7 @@ Three pieces, one binary:
 2. **GUI** (SwiftUI) — reads the same SQLite database read-only. Live wattage from `AppleSmartBattery` IORegistry entry. App icons from `NSWorkspace`.
 3. **CLI query commands** — `openmacbattery top`, `app`, `timeline`, `export`, `stats`, `prune`, `calibrate`.
 
-The SQLite database uses WAL mode + `auto_vacuum=INCREMENTAL`. Hourly aggregates are rolled up automatically; raw samples older than 7 days and aggregates older than 180 days are pruned daily at ~03:00.
+The SQLite database uses WAL mode + `auto_vacuum=INCREMENTAL`. Hourly aggregates are rolled up automatically; raw samples older than 30 days and aggregates older than 180 days are pruned daily at ~03:00.
 
 ## Battery impact
 
@@ -163,7 +163,7 @@ rm -f "$HOME/Library/Logs/openmacbattery.log" \
 | **GUI looks stale** | Click the refresh button in the toolbar (top right) or press ⌘R. Live wattage and history update every 60 s. |
 | **Energy values look strange** | Energy uses macOS's native `ri_energy_nj` counter on supported Apple Silicon Macs. Restart sampling after an update and allow at least two samples for new data. |
 | **Can't quit a system service from the right-click menu** | By design — system services (root-owned, sandboxed Apple daemons) can't be terminated by user-level processes. Use Activity Monitor with admin privileges if you really need to. |
-| **Reset everything** | `openmacbattery reset --confirm` deletes the database and starts fresh. |
+| **Reset everything** | Remove the database at `~/Library/Application Support/OpenMacBattery/data.db` and restart the daemon. |
 
 Logs:
 

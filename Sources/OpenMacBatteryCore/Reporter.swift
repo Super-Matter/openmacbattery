@@ -187,9 +187,10 @@ public final class Reporter {
     }
 
     /// Birden fazla group key için birleşik zaman serisi (helper'lar parent'a katlanmış olduğunda).
-    public func appTimelineMulti(groupKeys: [String], range: DateRange, bucketSeconds: Int = 600) throws -> [TimelinePoint] {
+    public func appTimelineMulti(groupKeys: [String], range: DateRange, bucketSeconds: Int = 600, onlyBattery: Bool = false) throws -> [TimelinePoint] {
         guard !groupKeys.isEmpty else { return [] }
         let placeholders = groupKeys.map { _ in "?" }.joined(separator: ",")
+        let batteryClause = onlyBattery ? "AND is_on_battery = 1" : ""
         let sql = """
         SELECT
             (timestamp / ?) * ? AS bucket,
@@ -197,7 +198,7 @@ public final class Reporter {
             COALESCE(SUM(cpu_user_ns + cpu_system_ns), 0)
         FROM samples
         WHERE timestamp BETWEEN ? AND ?
-          AND energy_nj IS NOT NULL
+          AND energy_nj IS NOT NULL \(batteryClause)
           AND COALESCE(bundle_id, exec_path, 'unknown') IN (\(placeholders))
         GROUP BY bucket
         ORDER BY bucket ASC;
@@ -296,23 +297,27 @@ public final class Reporter {
         let from = now - Int64(rangeSec)
         let sql = """
         WITH battery AS (
-            SELECT timestamp, MAX(battery_percent) AS percent
+            SELECT timestamp,
+                   MAX(battery_percent) AS percent,
+                   MAX(is_on_battery) AS is_on_battery
             FROM samples
             WHERE timestamp BETWEEN ? AND ?
-              AND is_on_battery = 1
               AND battery_percent IS NOT NULL
             GROUP BY timestamp
         ), pairs AS (
-            SELECT timestamp, percent,
+            SELECT timestamp, percent, is_on_battery,
                    LEAD(timestamp) OVER (ORDER BY timestamp) AS next_timestamp,
-                   LEAD(percent) OVER (ORDER BY timestamp) AS next_percent
+                   LEAD(percent) OVER (ORDER BY timestamp) AS next_percent,
+                   LEAD(is_on_battery) OVER (ORDER BY timestamp) AS next_on_battery
             FROM battery
         )
         SELECT
-            COALESCE(SUM(CASE WHEN next_timestamp - timestamp BETWEEN 1 AND 300
+            COALESCE(SUM(CASE WHEN is_on_battery = 1 AND next_on_battery = 1
+                                   AND next_timestamp - timestamp BETWEEN 1 AND 300
                                    AND next_percent < percent
                               THEN percent - next_percent ELSE 0 END), 0),
-            COALESCE(SUM(CASE WHEN next_timestamp - timestamp BETWEEN 1 AND 300
+            COALESCE(SUM(CASE WHEN is_on_battery = 1 AND next_on_battery = 1
+                              AND next_timestamp - timestamp BETWEEN 1 AND 300
                               THEN next_timestamp - timestamp ELSE 0 END), 0),
             COUNT(*)
         FROM pairs;
@@ -413,8 +418,8 @@ public final class Reporter {
         let s3 = try db.prepare(durSql); defer { s3.finalize() }
         try s3.bind(1, range.from); try s3.bind(2, range.to)
         if s3.step() {
-            onBattSec = s3.int64(0) * 60
-            onAcSec = s3.int64(1) * 60
+            onBattSec = s3.int64(0)
+            onAcSec = s3.int64(1)
         }
 
         // Sleep süresi

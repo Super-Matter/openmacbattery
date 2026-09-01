@@ -106,6 +106,7 @@ public final class Sampler {
         let power = PowerSourceReader.current()
         let pids = ProcessInfoReader.listAllPids()
         var seenKeys = Set<ProcessKey>()
+        var pendingBaselines: [ProcessKey: SampleBaseline] = [:]
         var insertedRows = 0
         var permDenied = 0
 
@@ -130,9 +131,9 @@ public final class Sampler {
                     if err == EPERM { permDenied += 1 }
                     continue
                 }
-                let key = ProcessKey(pid: pid, startTvSec: id.startTvSec)
+                let key = ProcessKey(pid: pid, startTvSec: id.startTvSec, startTvUsec: id.startTvUsec)
                 seenKeys.insert(key)
-                let meta = resolver.resolve(pid: pid, startTvSec: id.startTvSec)
+                let meta = resolver.resolve(pid: pid, startTvSec: id.startTvSec, startTvUsec: id.startTvUsec)
 
                 // Delta hesapla — baseline yoksa ilk sample 0 yazılır (sonraki tick'te delta gelir)
                 let prev = baselines[key]
@@ -156,8 +157,7 @@ public final class Sampler {
                         return current >= previous ? current - previous : 0
                     }()
                 )
-
-                baselines[key] = SampleBaseline(
+                let currentBaseline = SampleBaseline(
                     userTimeNs: ru.userTimeNs,
                     systemTimeNs: ru.systemTimeNs,
                     pkgIdleWakeups: ru.pkgIdleWakeups,
@@ -169,8 +169,12 @@ public final class Sampler {
                     energyNanojoules: ru.energyNanojoules
                 )
 
-                // İlk sample'ı (baseline yokken) atla — delta bilgisi anlamsız
-                if prev == nil { continue }
+                // İlk sample'ı (baseline yokken) atla — delta bilgisi anlamsız.
+                // Keep it pending until the transaction commits.
+                if prev == nil {
+                    pendingBaselines[key] = currentBaseline
+                    continue
+                }
 
                 stmt.reset()
                 try stmt.bind(1, now)
@@ -200,10 +204,12 @@ public final class Sampler {
                 try stmt.bind(16, Int64(power.isOnBattery ? 1 : 0))
                 if let p = power.batteryPercent { try stmt.bind(17, Int64(p)) } else { try stmt.bindNull(17) }
                 try stmt.bind(18, Int64(ru.rusageVersion))
-                _ = stmt.step()
+                try stmt.execute()
                 insertedRows += 1
+                pendingBaselines[key] = currentBaseline
             }
         }
+        baselines.merge(pendingBaselines) { _, new in new }
 
         // Cache + baseline temizliği — kaybolan PID'ler için
         let seenSet = seenKeys

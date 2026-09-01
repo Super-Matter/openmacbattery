@@ -44,7 +44,7 @@ public struct BatterySnapshot {
     /// Sağlık % (max / design)
     public var healthPercent: Int {
         guard designCapacity_mAh > 0 else { return 100 }
-        return Int(round(Double(maxCapacity_mAh) / Double(designCapacity_mAh) * 100))
+        return min(100, max(0, Int(round(Double(maxCapacity_mAh) / Double(designCapacity_mAh) * 100))))
     }
 }
 
@@ -210,6 +210,9 @@ public enum PowerSourceReader {
         let rawMax = (dict["AppleRawMaxCapacity"] as? Int) ?? 0
         let maxCap = rawMax > 0 ? rawMax : design
         let curRaw = (dict["AppleRawCurrentCapacity"] as? Int) ?? 0
+        let currentCapacity = curRaw > 0
+            ? curRaw
+            : Int((Double(maxCap) * Double(percent) / 100.0).rounded())
         func validTime(_ key: String) -> Int? {
             guard let value = dict[key] as? Int, value > 0, value < 65535 else { return nil }
             return value
@@ -232,7 +235,7 @@ public enum PowerSourceReader {
             externalConnected: external,
             designCapacity_mAh: design,
             maxCapacity_mAh: maxCap,
-            currentCapacity_mAh: curRaw,
+            currentCapacity_mAh: currentCapacity,
             voltage_mV: voltage,
             amperage_mA: amperage,
             temperatureC: temp,

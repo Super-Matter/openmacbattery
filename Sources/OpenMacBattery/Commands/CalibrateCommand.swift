@@ -8,12 +8,6 @@ struct CalibrateCommand: ParsableCommand {
         abstract: "Show native process energy measurement status"
     )
 
-    @Option(name: .long, help: "Calibration duration in seconds")
-    var duration: Int = 300
-
-    @Option(name: .long, help: "powermetrics interval in milliseconds")
-    var intervalMs: Int = 5000
-
     @Flag(name: .long, help: "Just show the current factor and exit")
     var show: Bool = false
 

@@ -1,5 +1,7 @@
 # macOS Battery Tracker — Per-App Geçmiş Pil Tüketim Takibi
 
+> **Tarihsel tasarım belgesi:** Bu dosya eski `battracker` adını ve kalibrasyon tasarımını içerir. Güncel davranış için [README.md](../README.md) ve kaynak kodunu esas alın: proje adı `openmacbattery`, Apple Silicon'da `ri_energy_nj` kullanılır ve varsayılan ham veri saklama süresi 30 gündür.
+
 ## 🎯 Amaç
 
 macOS'ta (Apple Silicon, M-series) **uygulama / process bazında geçmişe dönük pil/enerji tüketimini** kayıt altına alan bir araç. Apple'ın yerleşik araçları (Activity Monitor, System Settings → Battery) sadece anlık veya en fazla son 12 saatlik rolling window verisi sunuyor. Hedef: "dün gece 02:00–08:00 arası pilim niye %40 düşmüş, hangi uygulama yüzünden?" sorusuna cevap verebilen kalıcı bir log + sorgu sistemi.
@@ -61,7 +63,7 @@ int ret = proc_pid_rusage(pid, RUSAGE_INFO_V6, (rusage_info_t *)&ru);
 `rusage_info_v6`'dan kullanılacak alanlar:
 
 | Alan | Açıklama | Birim |
-|------|----------|-------|
+| ------ | ---------- | ------- |
 | `ri_pkg_idle_wkups` | Package idle wake-up sayısı | count |
 | `ri_interrupt_wkups` | Interrupt wake-up sayısı | count |
 | `ri_user_time` | Kullanıcı modu CPU zamanı | nanosaniye |
@@ -77,6 +79,7 @@ int ret = proc_pid_rusage(pid, RUSAGE_INFO_V6, (rusage_info_t *)&ru);
 Bu alan Apple tarafından **public olarak dokümante edilmedi.** Birimi joule **değil**; Apple'ın dahili "energy unit" havuzundan bir sayı (`task_power_info_v2` ile aynı). Açık kaynak referanslar (Stats, htop) bunu mutlak joule olarak göstermiyor — relatif "energy impact" puanı olarak kullanıyor.
 
 Yaklaşımımız:
+
 - **Raw değeri olduğu gibi sakla** (`energy_billed_raw`).
 - Joule göstermek için **kalibrasyon faktörü** kullan: `joule = raw × ENERGY_UNIT_FACTOR`.
 - Faktörü ampirik bul: bilinen yük altında (yt-dlp, cpuburn vb.) `powermetrics --show-process-energy` ile cross-check, lineer regresyonla katsayı çıkar. Bu kalibrasyon adımı **Phase 1 DoD'sine dahil**.
@@ -104,6 +107,7 @@ GUI app'ler için `NSRunningApplication.bundleIdentifier` + `.localizedName`. Da
 ## 🔐 Erişim Sınırları (önemli)
 
 `proc_pid_rusage` kullanıcının **kendi UID'sindeki** process'ler için çalışır. Aşağıdakiler için `EPERM` döner:
+
 - WindowServer, kernel_task, launchd, coreaudiod gibi system daemon'lar (root/_windowserver vs.)
 - Diğer kullanıcıların process'leri
 - SIP korumalı bazı Apple process'leri (kısmen okunabilir, energy field'ları sıfır gelebilir)
@@ -122,6 +126,7 @@ Phase 2'de privileged helper tool (`SMAppService`) eklendiğinde bu gap kapanır
 `sudo powermetrics --samplers tasks --show-process-energy --format plist` her process için `energy_impact` ve gerçek mW okuması verir. Phase 1'de **kalibrasyon için** kullanılacak; Phase 2'de privileged helper ile runtime'da.
 
 Phase 1 manuel kalibrasyon:
+
 ```bash
 battracker calibrate --duration 300
 # 5 dakika boyunca paralel powermetrics + rusage örnekler,
@@ -430,7 +435,7 @@ battracker top --since 5m
 
 ## 🎁 Referanslar
 
-- **Stats** (https://github.com/exelban/stats) — `proc_pid_rusage` + `IOPSCopyPowerSourcesInfo` kullanımı
+- **Stats** (<https://github.com/exelban/stats>) — `proc_pid_rusage` + `IOPSCopyPowerSourcesInfo` kullanımı
 - **htop / osquery** — task_power_info örnekleri
 - Apple `darwintests/proc_info` (XNU) — `RUSAGE_INFO_V6` örnekleri
 - WWDC 2014 "Writing Energy Efficient Code"

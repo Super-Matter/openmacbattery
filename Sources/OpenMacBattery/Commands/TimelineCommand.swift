@@ -13,6 +13,8 @@ struct TimelineCommand: ParsableCommand {
     @Option(name: .long, help: "Bucket size in seconds") var bucket: Int = 600
 
     func run() throws {
+        guard top > 0 else { throw ValidationError("top must be positive") }
+        guard bucket > 0 else { throw ValidationError("bucket must be positive") }
         let db = try openDatabase()
         let reporter = Reporter(db: db)
         let range = DateRange.since(try DurationParser.parse(since))

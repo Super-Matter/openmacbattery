@@ -20,6 +20,15 @@ enum TimeRange: String, CaseIterable, Identifiable {
         case .d30: return "This month"
         }
     }
+    var previousPeriodKey: String {
+        switch self {
+        case .h1: return "the previous hour"
+        case .h6: return "the previous 6 hours"
+        case .h24: return "the previous 24 hours"
+        case .d7: return "the previous week"
+        case .d30: return "the previous month"
+        }
+    }
     /// SwiftUI Text içinde otomatik localize edilir.
     var displayName: LocalizedStringKey {
         return LocalizedStringKey(displayKey)
@@ -110,7 +119,7 @@ struct PeriodCompare {
 /// Per-app anomali: bu periyodda enerji önceki periyodun X katından fazla mı.
 struct AppAnomaly {
     let ratio: Double      // current / previous
-    let label: String      // "×3 normalden çok"
+    let label: String      // "3× usual"
 }
 
 @MainActor
@@ -142,6 +151,23 @@ final class AppModel: ObservableObject {
     @Published var errorMessage: String? = nil
 
     private var refreshTimer: Timer?
+    private var reloadTask: Task<Void, Never>?
+    private var detailTask: Task<Void, Never>?
+    private var reloadGeneration = 0
+
+    private struct ReloadData {
+        let apps: [GroupedApp]
+        let batteryTimeline: [BatterySample]
+        let sleepPeriods: [SleepInterval]
+        let sparklines: [String: [Double]]
+        let hero: HeroSummary
+        let totalUserEnergy: Int64
+        let compare: PeriodCompare
+        let anomalies: [String: AppAnomaly]
+        let stats: DBStats
+        let avgWatts1h: Double?
+        let adjustedRemainingMin: Int?
+    }
 
     init() {
         // Timer closure'larında "weak self"i Task'a girmeden önce strong'a alıyoruz.
@@ -185,10 +211,11 @@ final class AppModel: ObservableObject {
         if displayPowerWatts != display?.watts { displayPowerWatts = display?.watts }
         if displayBrightnessPercent != brightness { displayBrightnessPercent = brightness }
         if !sameBatterySnapshot(batterySnapshot, snapshot) { batterySnapshot = snapshot }
-        if let r = reading, r.watts > 0.1, totalUserEnergy > 0 {
+        let allocationTotal = apps.reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
+        if let r = reading, r.watts > 0.1, allocationTotal > 0 {
             var dist: [String: Double] = [:]
-            for app in apps where !app.isSystem {
-                let frac = Double(max(app.energyRaw, 0)) / Double(totalUserEnergy)
+            for app in apps {
+                let frac = Double(max(app.energyRaw, 0)) / Double(allocationTotal)
                 dist[app.id] = frac * r.watts
             }
             if liveAppWatts != dist { liveAppWatts = dist }
@@ -221,163 +248,233 @@ final class AppModel: ObservableObject {
 
     func refreshNow() {
         refreshLiveWatts()
-        Task { await self.reload() }
+        reloadGeneration += 1
+        let generation = reloadGeneration
+        reloadTask?.cancel()
+        loading = true
+
+        let seconds = range.seconds
+        let bucketSeconds = range.bucketSeconds
+        let onBattery = onBattery
+        let showSystem = showSystem
+        let snapshot = batterySnapshot
+        reloadTask = Task { [weak self] in
+            do {
+                let data = try await Task.detached(priority: .utility) {
+                    try Self.loadReloadData(
+                        seconds: seconds,
+                        bucketSeconds: bucketSeconds,
+                        onBattery: onBattery,
+                        showSystem: showSystem,
+                        snapshot: snapshot
+                    )
+                }.value
+                guard !Task.isCancelled else { return }
+                guard let self, self.reloadGeneration == generation else { return }
+                self.apply(data, generation: generation)
+            } catch {
+                guard !Task.isCancelled, let self, self.reloadGeneration == generation else { return }
+                self.loading = false
+                self.errorMessage = String(format: NSLocalizedString("Could not read data: %@", comment: ""), "\(error)")
+            }
+        }
     }
 
-    func reload() async {
-        loading = true
-        defer { loading = false }
-        do {
-            let db = try Database(path: Database.defaultPath())
-            let reporter = Reporter(db: db)
-            let r = DateRange.since(range.seconds)
+    private nonisolated static func loadReloadData(
+        seconds: Int64,
+        bucketSeconds: Int,
+        onBattery: Bool,
+        showSystem: Bool,
+        snapshot: BatterySnapshot?
+    ) throws -> ReloadData {
+        let db = try Database(path: Database.defaultPath())
+        let reporter = Reporter(db: db)
+        let r = DateRange.since(seconds)
 
-            let rawRows = try reporter.allApps(range: r, onlyBattery: onBattery)
-            let grouped = AppGrouping.group(rawRows)
-            let visible = showSystem ? grouped : grouped.filter { !$0.isSystem }
+        let rawRows = try reporter.allApps(range: r, onlyBattery: onBattery)
+        let grouped = AppGrouping.group(rawRows)
+        let visible = showSystem ? grouped : grouped.filter { !$0.isSystem }
 
-            let bat = try reporter.batteryTimeline(range: r, bucketSeconds: range.bucketSeconds)
-                .map { BatterySample(date: Date(timeIntervalSince1970: TimeInterval($0.bucket)),
-                                     percent: $0.percent, onBattery: $0.onBattery) }
-            let sleep = try reporter.sleepPeriods(range: r).map {
-                SleepInterval(start: Date(timeIntervalSince1970: TimeInterval($0.start)),
-                              end: Date(timeIntervalSince1970: TimeInterval($0.end)))
+        let bat = try reporter.batteryTimeline(range: r, bucketSeconds: bucketSeconds)
+            .map { BatterySample(date: Date(timeIntervalSince1970: TimeInterval($0.bucket)),
+                                 percent: $0.percent, onBattery: $0.onBattery) }
+        let sleep = try reporter.sleepPeriods(range: r).map {
+            SleepInterval(start: Date(timeIntervalSince1970: TimeInterval($0.start)),
+                          end: Date(timeIntervalSince1970: TimeInterval($0.end)))
+        }
+        let bs = try reporter.batterySummary(range: r)
+        var avgWatts1h: Double?
+        var adjustedRemainingMin: Int?
+        if let snapshot, snapshot.fullWh > 0 {
+            let observed = try? reporter.averageBatteryWatts(rangeSec: 3600, fullWh: snapshot.fullWh)
+            avgWatts1h = observed?.watts
+            if !snapshot.isCharging, snapshot.percent > 0, let observed, observed.watts > 0 {
+                let remainingWh = snapshot.fullWh * Double(snapshot.percent) / 100.0
+                let observedMin = remainingWh / observed.watts * 60.0
+                if let systemMin = snapshot.macOsTimeRemainingMin, systemMin > 0 {
+                    let bounded = min(max(observedMin, Double(systemMin) * 0.5), Double(systemMin) * 2.0)
+                    adjustedRemainingMin = Int((Double(systemMin) * 0.75 + bounded * 0.25).rounded())
+                } else {
+                    adjustedRemainingMin = Int(observedMin.rounded())
+                }
             }
-            let bs = try reporter.batterySummary(range: r)
-            self.adjustedRemainingMin = nil
-            if let snap = batterySnapshot, snap.fullWh > 0 {
-                let observed = try? reporter.averageBatteryWatts(rangeSec: 3600, fullWh: snap.fullWh)
-                self.avgWatts1h = observed?.watts
+        }
 
-                if !snap.isCharging, snap.percent > 0, let observed {
-                    let remainingWh = snap.fullWh * Double(snap.percent) / 100.0
-                    let observedMin = remainingWh / observed.watts * 60.0
-                    if let systemMin = snap.macOsTimeRemainingMin, systemMin > 0 {
-                        // Let macOS react quickly to workload changes, while our
-                        // longer battery history smooths out gauge noise.
-                        let bounded = min(max(observedMin, Double(systemMin) * 0.5), Double(systemMin) * 2.0)
-                        self.adjustedRemainingMin = Int((Double(systemMin) * 0.75 + bounded * 0.25).rounded())
-                    } else {
-                        self.adjustedRemainingMin = Int(observedMin.rounded())
+        let sparkBuckets = 32
+        let sparkBucketSec = max(60, Int(seconds) / sparkBuckets)
+        let rawSpark = try reporter.sparklineBuckets(range: r, bucketSeconds: sparkBucketSec, onlyBattery: onBattery)
+        var sparkOut: [String: [Double]] = [:]
+        let firstBucket = (r.from / Int64(sparkBucketSec)) * Int64(sparkBucketSec)
+        let lastBucket = (r.to / Int64(sparkBucketSec)) * Int64(sparkBucketSec)
+        let bucketCount = Int((lastBucket - firstBucket) / Int64(sparkBucketSec)) + 1
+        for app in visible {
+            var series = [Double](repeating: 0, count: max(1, min(bucketCount, sparkBuckets * 2)))
+            for key in app.memberKeys {
+                guard let points = rawSpark[key] else { continue }
+                for (bucket, energy) in points {
+                    let index = Int((bucket - firstBucket) / Int64(sparkBucketSec))
+                    if index >= 0 && index < series.count {
+                        series[index] += Double(max(0, energy))
                     }
                 }
-            } else {
-                self.avgWatts1h = nil
             }
+            sparkOut[app.id] = series
+        }
 
-            // Sparkline'lar (sidebar mini grafik)
-            let sparkBuckets = 32
-            let sparkBucketSec = max(60, Int(range.seconds) / sparkBuckets)
-            let rawSpark = try reporter.sparklineBuckets(range: r, bucketSeconds: sparkBucketSec, onlyBattery: onBattery)
-            var sparkOut: [String: [Double]] = [:]
-            // Tüm bucket'ları aynı X eksenine hizala
-            let firstBucket = (r.from / Int64(sparkBucketSec)) * Int64(sparkBucketSec)
-            let lastBucket  = (r.to   / Int64(sparkBucketSec)) * Int64(sparkBucketSec)
-            let bucketCount = Int((lastBucket - firstBucket) / Int64(sparkBucketSec)) + 1
+        let prevRange = DateRange(from: r.from - seconds, to: r.from)
+        let prevByKey = (try? reporter.energyByGroupKey(range: prevRange, onlyBattery: onBattery)) ?? [:]
+        let oldestSec = (try? reporter.stats().oldest) ?? nil
+        let hasPrevious: Bool = {
+            guard let oldestSec else { return false }
+            return oldestSec <= prevRange.from + seconds / 2
+        }()
+        let prevTotal = visible.reduce(Int64(0)) { total, app in
+            total + app.memberKeys.reduce(Int64(0)) { $0 + max(prevByKey[$1] ?? 0, 0) }
+        }
+        let curTotal = visible.reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
+        let compare = PeriodCompare(
+            currentTotalEnergy: curTotal,
+            previousTotalEnergy: prevTotal,
+            hasPrevious: hasPrevious
+        )
+
+        var anomalies: [String: AppAnomaly] = [:]
+        if hasPrevious {
             for app in visible {
-                var series = [Double](repeating: 0, count: max(1, min(bucketCount, sparkBuckets * 2)))
-                for key in app.memberKeys {
-                    guard let pts = rawSpark[key] else { continue }
-                    for (b, e) in pts {
-                        let idx = Int((b - firstBucket) / Int64(sparkBucketSec))
-                        if idx >= 0 && idx < series.count {
-                            series[idx] += Double(max(0, e))
-                        }
-                    }
-                }
-                sparkOut[app.id] = series
+                let prevEnergy = app.memberKeys.reduce(Int64(0)) { $0 + max(prevByKey[$1] ?? 0, 0) }
+                guard prevEnergy > 10000, app.energyRaw > prevEnergy * 2 else { continue }
+                let ratio = Double(app.energyRaw) / Double(prevEnergy)
+                anomalies[app.id] = AppAnomaly(
+                    ratio: ratio,
+                    label: ratio >= 10
+                        ? NSLocalizedString("10×+ usual", comment: "")
+                        : String(format: NSLocalizedString("%.0f× usual", comment: ""), ratio)
+                )
             }
+        }
 
-            // Önceki periyot karşılaştırması — aynı uzunlukta range, daha eski
-            let prevRange = DateRange(from: r.from - range.seconds, to: r.from)
-            let prevByKey = (try? reporter.energyByGroupKey(range: prevRange, onlyBattery: onBattery)) ?? [:]
-            let oldestSec = (try? reporter.stats().oldest) ?? nil
-            let hasPrevious: Bool = {
-                guard let o = oldestSec else { return false }
-                // Önceki range'in çoğunu kapsayacak kadar eski veri var mı
-                return o <= prevRange.from + range.seconds / 2
-            }()
-            let prevTotal: Int64 = visible.reduce(Int64(0)) { acc, app in
-                let s = app.memberKeys.reduce(Int64(0)) { $0 + max(prevByKey[$1] ?? 0, 0) }
-                return acc + s
-            }
-            let curTotal = visible.reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
-            self.compare = PeriodCompare(currentTotalEnergy: curTotal, previousTotalEnergy: prevTotal, hasPrevious: hasPrevious)
+        let st = try reporter.stats()
+        let totalUserEnergy = visible.filter { !$0.isSystem }
+            .reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
+        let hero = HeroSummary(
+            firstPercent: bs.firstPercent,
+            lastPercent: bs.lastPercent,
+            onBatterySeconds: bs.onBatterySeconds,
+            onAcSeconds: bs.onAcSeconds,
+            sleepSeconds: bs.sleepSeconds,
+            topThree: Array(visible.prefix(3)),
+            totalUserEnergy: totalUserEnergy
+        )
+        let stats = DBStats(
+            sampleCount: st.sampleCount,
+            sizeBytes: st.dbBytes,
+            oldest: st.oldest.map { Date(timeIntervalSince1970: TimeInterval($0)) },
+            newest: st.newest.map { Date(timeIntervalSince1970: TimeInterval($0)) },
+            calibrationFactor: st.calibrationFactor
+        )
+        return ReloadData(
+            apps: visible,
+            batteryTimeline: bat,
+            sleepPeriods: sleep,
+            sparklines: sparkOut,
+            hero: hero,
+            totalUserEnergy: totalUserEnergy,
+            compare: compare,
+            anomalies: anomalies,
+            stats: stats,
+            avgWatts1h: avgWatts1h,
+            adjustedRemainingMin: adjustedRemainingMin
+        )
+    }
 
-            // Per-app anomali — current/previous oranı ≥ 2 ve previous yeterince büyükse
-            var anomalies: [String: AppAnomaly] = [:]
-            if hasPrevious {
-                for app in visible {
-                    let prevEnergy = app.memberKeys.reduce(Int64(0)) { $0 + max(prevByKey[$1] ?? 0, 0) }
-                    guard prevEnergy > 10000, app.energyRaw > prevEnergy * 2 else { continue }
-                    let ratio = Double(app.energyRaw) / Double(prevEnergy)
-                    anomalies[app.id] = AppAnomaly(
-                        ratio: ratio,
-                        label: ratio >= 10 ? "×10+ normalden" : String(format: "×%.0f normalden", ratio)
-                    )
-                }
-            }
-            self.anomalies = anomalies
+    private func apply(_ data: ReloadData, generation: Int) {
+        guard generation == reloadGeneration else { return }
+        loading = false
+        apps = data.apps
+        totalUserEnergy = data.totalUserEnergy
+        batteryTimeline = data.batteryTimeline
+        sleepPeriods = data.sleepPeriods
+        sparklines = data.sparklines
+        hero = data.hero
+        compare = data.compare
+        anomalies = data.anomalies
+        stats = data.stats
+        avgWatts1h = data.avgWatts1h
+        adjustedRemainingMin = data.adjustedRemainingMin
+        refreshLiveWatts()
+        lastRefresh = Date()
+        errorMessage = nil
 
-            let st = try reporter.stats()
-
-            self.apps = visible
-            self.totalUserEnergy = visible.reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
-            self.batteryTimeline = bat
-            self.sleepPeriods = sleep
-            self.sparklines = sparkOut
-            self.hero = HeroSummary(
-                firstPercent: bs.firstPercent,
-                lastPercent: bs.lastPercent,
-                onBatterySeconds: bs.onBatterySeconds,
-                onAcSeconds: bs.onAcSeconds,
-                sleepSeconds: bs.sleepSeconds,
-                topThree: Array(visible.prefix(3)),
-                totalUserEnergy: visible.reduce(Int64(0)) { $0 + max($1.energyRaw, 0) }
-            )
-            self.stats = DBStats(
-                sampleCount: st.sampleCount,
-                sizeBytes: st.dbBytes,
-                oldest: st.oldest.map { Date(timeIntervalSince1970: TimeInterval($0)) },
-                newest: st.newest.map { Date(timeIntervalSince1970: TimeInterval($0)) },
-                calibrationFactor: st.calibrationFactor
-            )
-            self.lastRefresh = Date()
-            self.errorMessage = nil
-
-            if let sel = selectedAppId, !visible.contains(where: { $0.id == sel }) {
-                selectedAppId = visible.first?.id
-            } else if selectedAppId == nil {
-                selectedAppId = visible.first?.id
-            } else {
-                reloadDetail()
-            }
-        } catch {
-            self.errorMessage = "Veri okunamadı: \(error)"
+        if let selectedAppId, !apps.contains(where: { $0.id == selectedAppId }) {
+            self.selectedAppId = apps.first?.id
+        } else if selectedAppId == nil {
+            selectedAppId = apps.first?.id
+        } else {
+            reloadDetail()
         }
     }
 
     private func reloadDetail() {
+        detailTask?.cancel()
         guard let id = selectedAppId,
               let app = apps.first(where: { $0.id == id }) else {
-            self.detailTimeline = []
+            detailTimeline = []
+            narrative = nil
             return
         }
-        Task { await self.loadDetail(app: app) }
-    }
 
-    private func loadDetail(app: GroupedApp) async {
-        do {
-            let db = try Database(path: Database.defaultPath())
-            let reporter = Reporter(db: db)
-            let r = DateRange.since(range.seconds)
-            let pts = try reporter.appTimelineMulti(groupKeys: app.memberKeys, range: r, bucketSeconds: range.bucketSeconds)
-                .map { TimelineSample(date: Date(timeIntervalSince1970: TimeInterval($0.bucket)),
-                                      energyRaw: $0.energyRaw, cpuNs: $0.cpuNs) }
-            self.detailTimeline = pts
-            self.narrative = computeNarrative(samples: pts, bucketSec: range.bucketSeconds)
-        } catch {
-            self.errorMessage = "Detay okunamadı: \(error)"
+        let seconds = range.seconds
+        let bucketSeconds = range.bucketSeconds
+        let onBattery = onBattery
+        detailTask = Task { [weak self] in
+            do {
+                let points = try await Task.detached(priority: .utility) {
+                    let db = try Database(path: Database.defaultPath())
+                    let reporter = Reporter(db: db)
+                    let range = DateRange.since(seconds)
+                    return try reporter.appTimelineMulti(
+                        groupKeys: app.memberKeys,
+                        range: range,
+                        bucketSeconds: bucketSeconds,
+                        onlyBattery: onBattery
+                    ).map {
+                        TimelineSample(
+                            date: Date(timeIntervalSince1970: TimeInterval($0.bucket)),
+                            energyRaw: $0.energyRaw,
+                            cpuNs: $0.cpuNs
+                        )
+                    }
+                }.value
+                guard !Task.isCancelled, let self,
+                      self.selectedAppId == id,
+                      self.range.seconds == seconds,
+                      self.onBattery == onBattery else { return }
+                self.detailTimeline = points
+                self.narrative = self.computeNarrative(samples: points, bucketSec: bucketSeconds)
+            } catch {
+                guard !Task.isCancelled, let self else { return }
+                self.errorMessage = String(format: NSLocalizedString("Could not read details: %@", comment: ""), "\(error)")
+            }
         }
     }
 

@@ -167,7 +167,7 @@ public enum Calibrator {
         for pid in ProcessInfoReader.listAllPids() {
             guard let id = ProcessInfoReader.identity(pid: pid), id.uid == getuid() else { continue }
             guard let r = ProcessInfoReader.rusage(pid: pid), r.rusageVersion >= 6 else { continue }
-            out[ProcessKey(pid: pid, startTvSec: id.startTvSec)] = r.billedEnergy
+            out[ProcessKey(pid: pid, startTvSec: id.startTvSec, startTvUsec: id.startTvUsec)] = r.billedEnergy
         }
         return out
     }

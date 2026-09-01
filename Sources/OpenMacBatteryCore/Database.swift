@@ -18,6 +18,9 @@ public enum DatabaseError: Error, CustomStringConvertible {
 }
 
 public final class Database {
+    public static let rawRetentionDays = 30
+    public static let hourlyRetentionDays = 180
+
     private var handle: OpaquePointer?
     public let path: String
 
@@ -131,23 +134,41 @@ public final class Database {
         defer { s.finalize() }
         try s.bind(1, key)
         try s.bind(2, value)
-        _ = s.step()
+        try s.execute()
     }
 
     private func migrate() throws {
-        let v = Int(meta(key: "schema_version") ?? "0") ?? 0
-        if v < 1 {
-            try exec(Schema.v1)
-            try setMeta(key: "schema_version", value: "1")
+        var version = Int(meta(key: "schema_version") ?? "0") ?? 0
+        if version < 1 {
+            try transaction {
+                try exec(Schema.v1)
+                try setMeta(key: "schema_version", value: "1")
+            }
+            version = 1
         }
-        if v < 2 {
-            try exec("ALTER TABLE samples ADD COLUMN energy_nj INTEGER;")
-            try exec("DELETE FROM hourly_aggregates;")
-            try setMeta(key: "energy_metric", value: "ri_energy_nj")
-            try setMeta(key: "energy_unit_factor", value: "1e-9")
-            try setMeta(key: "energy_unit_calibrated_at", value: "native")
-            try setMeta(key: "schema_version", value: "2")
+        if version < 2 {
+            try transaction {
+                // A crash after ALTER TABLE but before the metadata update must
+                // be safe to retry on the next launch.
+                if !tableHasColumn("samples", "energy_nj") {
+                    try exec("ALTER TABLE samples ADD COLUMN energy_nj INTEGER;")
+                }
+                try exec("DELETE FROM hourly_aggregates;")
+                try setMeta(key: "energy_metric", value: "ri_energy_nj")
+                try setMeta(key: "energy_unit_factor", value: "1e-9")
+                try setMeta(key: "energy_unit_calibrated_at", value: "native")
+                try setMeta(key: "schema_version", value: "2")
+            }
         }
+    }
+
+    private func tableHasColumn(_ table: String, _ column: String) -> Bool {
+        guard let stmt = try? prepare("PRAGMA table_info(\(table));") else { return false }
+        defer { stmt.finalize() }
+        while stmt.step() {
+            if stmt.string(1) == column { return true }
+        }
+        return false
     }
 }
 
@@ -168,6 +189,17 @@ public final class Statement {
     public func step() -> Bool {
         guard let s = stmt else { return false }
         return sqlite3_step(s) == SQLITE_ROW
+    }
+
+    @discardableResult
+    public func execute() throws -> Int32 {
+        guard let s = stmt else { throw DatabaseError.step("statement finalized") }
+        let rc = sqlite3_step(s)
+        guard rc == SQLITE_DONE else {
+            let message = String(cString: sqlite3_errmsg(sqlite3_db_handle(s)))
+            throw DatabaseError.step(message)
+        }
+        return rc
     }
 
     public func reset() {

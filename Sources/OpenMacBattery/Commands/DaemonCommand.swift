@@ -18,6 +18,9 @@ struct DaemonCommand: ParsableCommand {
         var interval: Double = 60.0
 
         func run() throws {
+            guard interval.isFinite, interval > 0 else {
+                throw ValidationError("interval must be a positive finite number")
+            }
             let db = try openDatabase()
             var cfg = SamplerConfig.default
             cfg.interval = interval
@@ -30,12 +33,22 @@ struct DaemonCommand: ParsableCommand {
                 let ts = Int64(Date().timeIntervalSince1970)
                 switch event {
                 case .willSleep:
-                    if let s = try? db.prepare("INSERT OR REPLACE INTO sleep_periods(sleep_start, sleep_end) VALUES(?, NULL);") {
-                        try? s.bind(1, ts); _ = s.step(); s.finalize()
+                    do {
+                        let s = try db.prepare("INSERT OR REPLACE INTO sleep_periods(sleep_start, sleep_end) VALUES(?, NULL);")
+                        defer { s.finalize() }
+                        try s.bind(1, ts)
+                        try s.execute()
+                    } catch {
+                        FileHandle.standardError.write(Data("sleep start: \(error)\n".utf8))
                     }
                 case .didWake:
-                    if let s = try? db.prepare("UPDATE sleep_periods SET sleep_end = ? WHERE sleep_end IS NULL;") {
-                        try? s.bind(1, ts); _ = s.step(); s.finalize()
+                    do {
+                        let s = try db.prepare("UPDATE sleep_periods SET sleep_end = ? WHERE sleep_end IS NULL;")
+                        defer { s.finalize() }
+                        try s.bind(1, ts)
+                        try s.execute()
+                    } catch {
+                        FileHandle.standardError.write(Data("sleep end: \(error)\n".utf8))
                     }
                 }
             }
@@ -56,13 +69,23 @@ struct DaemonCommand: ParsableCommand {
                 let h = Calendar.current.component(.hour, from: Date())
                 if h == 3 {
                     let now = Int64(Date().timeIntervalSince1970)
-                    let rawCutoff = now - 7 * 86400
-                    let hourlyCutoff = now - 180 * 86400
-                    if let s = try? db.prepare("DELETE FROM samples WHERE timestamp < ?;") {
-                        try? s.bind(1, rawCutoff); _ = s.step(); s.finalize()
+                    let rawCutoff = now - Int64(Database.rawRetentionDays) * 86400
+                    let hourlyCutoff = now - Int64(Database.hourlyRetentionDays) * 86400
+                    do {
+                        let s = try db.prepare("DELETE FROM samples WHERE timestamp < ?;")
+                        defer { s.finalize() }
+                        try s.bind(1, rawCutoff)
+                        try s.execute()
+                    } catch {
+                        FileHandle.standardError.write(Data("raw prune: \(error)\n".utf8))
                     }
-                    if let s = try? db.prepare("DELETE FROM hourly_aggregates WHERE hour_epoch < ?;") {
-                        try? s.bind(1, hourlyCutoff); _ = s.step(); s.finalize()
+                    do {
+                        let s = try db.prepare("DELETE FROM hourly_aggregates WHERE hour_epoch < ?;")
+                        defer { s.finalize() }
+                        try s.bind(1, hourlyCutoff)
+                        try s.execute()
+                    } catch {
+                        FileHandle.standardError.write(Data("aggregate prune: \(error)\n".utf8))
                     }
                     _ = try? db.exec("PRAGMA incremental_vacuum;")
                 }

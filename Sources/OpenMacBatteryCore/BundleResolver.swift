@@ -4,6 +4,7 @@ import AppKit
 public struct ProcessKey: Hashable {
     public let pid: pid_t
     public let startTvSec: UInt64
+    public let startTvUsec: UInt64
 }
 
 public struct ProcessMetadata {
@@ -17,8 +18,8 @@ public final class BundleResolver {
 
     public init() {}
 
-    public func resolve(pid: pid_t, startTvSec: UInt64) -> ProcessMetadata {
-        let key = ProcessKey(pid: pid, startTvSec: startTvSec)
+    public func resolve(pid: pid_t, startTvSec: UInt64, startTvUsec: UInt64 = 0) -> ProcessMetadata {
+        let key = ProcessKey(pid: pid, startTvSec: startTvSec, startTvUsec: startTvUsec)
         if let hit = cache[key] { return hit }
 
         var bundleId: String? = nil
@@ -49,8 +50,8 @@ public final class BundleResolver {
         return meta
     }
 
-    public func invalidate(pid: pid_t, startTvSec: UInt64) {
-        cache.removeValue(forKey: ProcessKey(pid: pid, startTvSec: startTvSec))
+    public func invalidate(pid: pid_t, startTvSec: UInt64, startTvUsec: UInt64 = 0) {
+        cache.removeValue(forKey: ProcessKey(pid: pid, startTvSec: startTvSec, startTvUsec: startTvUsec))
     }
 
     public func evictAll(except keys: Set<ProcessKey>) {

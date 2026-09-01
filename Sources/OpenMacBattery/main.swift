@@ -28,14 +28,20 @@ enum DurationParser {
         guard let last = s.last else { throw ValidationError("empty duration") }
         let unit = last
         let numStr = String(s.dropLast())
-        guard let num = Int64(numStr) else { throw ValidationError("bad duration: \(s)") }
+        guard let num = Int64(numStr), num > 0 else {
+            throw ValidationError("duration must be a positive integer: \(s)")
+        }
+        let multiplier: Int64
         switch unit {
-        case "s": return num
-        case "m": return num * 60
-        case "h": return num * 3600
-        case "d": return num * 86400
+        case "s": multiplier = 1
+        case "m": multiplier = 60
+        case "h": multiplier = 3600
+        case "d": multiplier = 86400
         default: throw ValidationError("unknown duration unit: \(unit)")
         }
+        let (seconds, overflow) = num.multipliedReportingOverflow(by: multiplier)
+        guard !overflow else { throw ValidationError("duration is too large: \(s)") }
+        return seconds
     }
 }
 

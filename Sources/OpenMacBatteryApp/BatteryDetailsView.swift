@@ -12,7 +12,7 @@ struct BatteryDetailsView: View {
             HStack(spacing: 10) {
                 BatteryGlyph(
                     percent: snap?.percent ?? 0,
-                    isCharging: snap?.isCharging == true || snap?.externalConnected == true
+                    isCharging: snap?.isCharging == true
                 )
                 .frame(width: 38, height: 20)
                 Text("Battery Details").font(.headline)

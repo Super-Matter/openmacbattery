@@ -18,6 +18,7 @@ struct TopCommand: ParsableCommand {
     var onBattery: Bool = false
 
     func run() throws {
+        guard limit > 0 else { throw ValidationError("limit must be positive") }
         let db = try openDatabase()
         let reporter = Reporter(db: db)
         let secs = try DurationParser.parse(since)

@@ -34,19 +34,28 @@ struct PruneCommand: ParsableCommand {
         abstract: "Apply retention policy and incremental_vacuum"
     )
 
-    @Option(name: .long, help: "Keep raw samples for this many days") var rawDays: Int = 7
-    @Option(name: .long, help: "Keep hourly aggregates for this many days") var hourlyDays: Int = 180
+    @Option(name: .long, help: "Keep raw samples for this many days") var rawDays: Int = Database.rawRetentionDays
+    @Option(name: .long, help: "Keep hourly aggregates for this many days") var hourlyDays: Int = Database.hourlyRetentionDays
 
     func run() throws {
+        guard rawDays >= 0, hourlyDays >= 0,
+              rawDays <= Int(Int64.max / 86400),
+              hourlyDays <= Int(Int64.max / 86400) else {
+            throw ValidationError("retention days must be valid non-negative values")
+        }
         let db = try openDatabase()
         let now = Int64(Date().timeIntervalSince1970)
         let rawCutoff = now - Int64(rawDays) * 86400
         let hourlyCutoff = now - Int64(hourlyDays) * 86400
 
         let s1 = try db.prepare("DELETE FROM samples WHERE timestamp < ?;")
-        try s1.bind(1, rawCutoff); _ = s1.step(); s1.finalize()
+        defer { s1.finalize() }
+        try s1.bind(1, rawCutoff)
+        try s1.execute()
         let s2 = try db.prepare("DELETE FROM hourly_aggregates WHERE hour_epoch < ?;")
-        try s2.bind(1, hourlyCutoff); _ = s2.step(); s2.finalize()
+        defer { s2.finalize() }
+        try s2.bind(1, hourlyCutoff)
+        try s2.execute()
         try db.exec("PRAGMA incremental_vacuum;")
         print("Pruned. Raw cutoff: \(rawDays)d, hourly cutoff: \(hourlyDays)d.")
     }

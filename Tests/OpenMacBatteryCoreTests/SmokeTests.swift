@@ -39,9 +39,76 @@ final class SmokeTests: XCTestCase {
         XCTAssertGreaterThan(r.sampleCount, 0)
     }
 
+    func testMigrationCanRetryAfterSchemaVersionReset() throws {
+        let tmp = NSTemporaryDirectory() + "openmacbattery_migration_\(UUID().uuidString).db"
+        defer { try? FileManager.default.removeItem(atPath: tmp) }
+        do {
+            let db = try Database(path: tmp)
+            try db.setMeta(key: "schema_version", value: "1")
+        }
+        let db = try Database(path: tmp)
+        XCTAssertEqual(db.meta(key: "schema_version"), "2")
+        XCTAssertEqual(db.meta(key: "energy_metric"), "ri_energy_nj")
+    }
+
     func testPowerSourceReadsWithoutCrashing() {
         _ = PowerSourceReader.current()
         _ = PowerSourceReader.batterySnapshot()
+    }
+
+    func testBatterySummaryUsesSeconds() throws {
+        let tmp = NSTemporaryDirectory() + "openmacbattery_duration_\(UUID().uuidString).db"
+        defer { try? FileManager.default.removeItem(atPath: tmp) }
+        let db = try Database(path: tmp)
+        try db.exec("""
+        INSERT INTO samples(timestamp, pid, proc_start_sec, cpu_user_ns, cpu_system_ns,
+                            energy_nj, is_on_battery, battery_percent, rusage_version)
+        VALUES (1000, 1, 1, 0, 0, 100, 1, 80, 6),
+               (1060, 1, 1, 0, 0, 100, 1, 79, 6);
+        """)
+
+        let summary = try Reporter(db: db).batterySummary(range: DateRange(from: 1000, to: 1060))
+        XCTAssertEqual(summary.onBatterySeconds, 120)
+        XCTAssertEqual(summary.onAcSeconds, 0)
+    }
+
+    func testDetailTimelineRespectsBatteryFilter() throws {
+        let tmp = NSTemporaryDirectory() + "openmacbattery_filter_\(UUID().uuidString).db"
+        defer { try? FileManager.default.removeItem(atPath: tmp) }
+        let db = try Database(path: tmp)
+        try db.exec("""
+        INSERT INTO samples(timestamp, pid, proc_start_sec, cpu_user_ns, cpu_system_ns,
+                            energy_nj, is_on_battery, battery_percent, rusage_version)
+        VALUES (1000, 1, 1, 0, 0, 100, 1, 80, 6),
+               (1060, 1, 1, 0, 0, 200, 1, 79, 6),
+               (1120, 1, 1, 0, 0, 400, 0, 79, 6);
+        """)
+        let reporter = Reporter(db: db)
+        let range = DateRange(from: 1000, to: 1120)
+        let battery = try reporter.appTimelineMulti(groupKeys: ["unknown"], range: range, onlyBattery: true)
+        let all = try reporter.appTimelineMulti(groupKeys: ["unknown"], range: range)
+        XCTAssertEqual(battery.reduce(Int64(0)) { $0 + $1.energyRaw }, 300)
+        XCTAssertEqual(all.reduce(Int64(0)) { $0 + $1.energyRaw }, 700)
+    }
+
+    func testAggregatorDeduplicatesProcessObservations() throws {
+        let tmp = NSTemporaryDirectory() + "openmacbattery_aggregate_\(UUID().uuidString).db"
+        defer { try? FileManager.default.removeItem(atPath: tmp) }
+        let db = try Database(path: tmp)
+        try db.exec("""
+        INSERT INTO samples(timestamp, pid, proc_start_sec, cpu_user_ns, cpu_system_ns,
+                            energy_nj, is_on_battery, battery_percent, rusage_version)
+        VALUES (1000, 1, 1, 0, 0, 100, 1, 80, 6),
+               (1000, 2, 2, 0, 0, 100, 1, 80, 6),
+               (1060, 1, 1, 0, 0, 100, 1, 79, 6);
+        """)
+
+        try Aggregator(db: db).rollUp(sinceEpochSec: 900)
+        let stmt = try db.prepare("SELECT sample_count, on_battery_seconds FROM hourly_aggregates WHERE hour_epoch = 0 AND bundle_id = 'unknown';")
+        defer { stmt.finalize() }
+        XCTAssertTrue(stmt.step())
+        XCTAssertEqual(stmt.int64(0), 3)
+        XCTAssertEqual(stmt.int64(1), 120)
     }
 
     func testDisplayPowerEstimate() {

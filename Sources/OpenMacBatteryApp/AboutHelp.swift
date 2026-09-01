@@ -38,7 +38,7 @@ struct HelpView: View {
                 }
 
                 section(title: "Quick Start") {
-                    bullet("At the top of the detail panel you'll see **Drawing now: X watts** — your live system draw.")
+                    bullet("At the top of the detail panel you'll see **Battery draw: X watts** — an estimate from battery current, not a complete wall-power measurement.")
                     bullet("The sidebar lists apps sorted by energy. Badges (**High / Medium / Low**) reflect their share of the total.")
                     bullet("Use the **Today / This week** menu at the top to look back as far as your data goes.")
                     bullet("**On battery only** filter — strips out measurements taken while plugged in. The real question is who eats your battery while unplugged.")
@@ -51,7 +51,7 @@ struct HelpView: View {
                 }
 
                 section(title: "Comparisons and warnings") {
-                    bullet("The current period is automatically compared to the previous one: **\"Today: 25% less battery than yesterday\"**.")
+                    bullet("The current period is compared with the equivalent previous period using app energy, not total battery drain.")
                     bullet("If an app is using **×N more than usual**, it gets a small orange warning in the sidebar.")
                     bullet("On battery, if a high consumer is selected, the detail panel shows an orange **quit suggestion** card.")
                 }
