@@ -47,7 +47,7 @@
 "%@ is consuming %@ battery" = "%@ %@ daha fazla pil tüketiyor";
 
 /* Live watts card */
-"Charging now (~%@ W in)" = "Şu an şarj oluyor (~%@ W giriyor)";
+"Battery charging: ~%@ W" = "Pil şarj oluyor: ~%@ W";
 "Battery draw: ~%@ W" = "Pil çekişi: ~%@ W";
 
 /* Battery life card — positional args */
@@ -114,7 +114,6 @@
 "Native macOS processor/task energy estimate; not total battery energy." = "Yerel macOS işlemci/görev enerjisi tahmini; toplam pil enerjisi değildir.";
 "Share of battery-only app energy" = "Sadece pildeki uygulama enerjisi payı";
 "Share of all app energy" = "Tüm uygulama enerjisi payı";
-"Battery share" = "Pildeki payı";
 "CPU time" = "Çalışma süresi";
 "Wakeups" = "Uyandırma";
 
@@ -181,8 +180,6 @@
 "Open error log" = "Hata logunu aç";
 "Open data folder" = "Veri klasörünü aç";
 "Diagnostics" = "Tanılama";
-"Calibration" = "Kalibrasyon";
-"To convert to real joules, run a one-time 5-minute comparison against Apple's powermetrics. Requires sudo, run from Terminal:" = "Joule birimine geçmek için Apple'ın kendi powermetrics aracıyla bir kez 5 dakikalık bir karşılaştırma yapılır. Sudo şifresi ister, Terminal üzerinden çalıştır:";
 "Copy command" = "Komutu kopyala";
 "Remove background tracking entirely" = "Arkaplan takibini tamamen kaldır";
 "Advanced" = "İleri";
@@ -196,7 +193,6 @@
 "Checks every running app on your Mac once per minute." = "Mac'inde çalışan tüm uygulamaları her dakika kontrol eder.";
 "Tells you which app drained your battery — looking back, not just now." = "Hangi uygulamanın ne kadar pil yediğini geriye dönük gösterir.";
 "Your data stays on this Mac. Nothing is sent over the network." = "Veri sadece bu Mac'te kalır. İnternete hiçbir şey gönderilmez.";
-"Uses almost no battery itself (~1-2 joules per hour)." = "Kendisi neredeyse hiç pil tüketmez (saatte ~1-2 joule).";
 "Background tracking enabled." = "Arkaplan takibi etkinleştirildi.";
 "Close" = "Kapat";
 "Install failed: %@" = "Kurulum başarısız: %@";

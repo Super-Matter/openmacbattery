@@ -44,7 +44,7 @@
 "Unsaved changes may be lost." = "Los cambios sin guardar pueden perderse.";
 
 /* Live watts */
-"Charging now (~%@ W in)" = "Cargando ahora (~%@ W de entrada)";
+"Battery charging: ~%@ W" = "Batería cargando: ~%@ W";
 "Battery draw: ~%@ W" = "Consumo de batería: ~%@ W";
 
 /* Battery life */
@@ -108,7 +108,6 @@
 "Native macOS processor/task energy estimate; not total battery energy." = "Estimación nativa de macOS de la energía del procesador/tarea; no es el consumo total de batería.";
 "Share of battery-only app energy" = "Cuota de energía de apps con batería";
 "Share of all app energy" = "Cuota de energía de todas las apps";
-"Battery share" = "Cuota de batería";
 "CPU time" = "Tiempo de CPU";
 "Wakeups" = "Despertares";
 
@@ -165,7 +164,6 @@
 "Open error log" = "Abrir registro de errores";
 "Open data folder" = "Abrir carpeta de datos";
 "Diagnostics" = "Diagnóstico";
-"Calibration" = "Calibración";
 "Copy command" = "Copiar comando";
 "Remove background tracking entirely" = "Eliminar seguimiento en segundo plano";
 "Advanced" = "Avanzado";
@@ -175,7 +173,6 @@
 "Checks every running app on your Mac once per minute." = "Comprueba todas las apps de tu Mac cada minuto.";
 "Tells you which app drained your battery — looking back, not just now." = "Te dice qué app consumió tu batería — mirando atrás, no sólo ahora.";
 "Your data stays on this Mac. Nothing is sent over the network." = "Tus datos se quedan en este Mac. No se envía nada por la red.";
-"Uses almost no battery itself (~1-2 joules per hour)." = "Apenas usa batería (~1-2 julios por hora).";
 "Background tracking enabled." = "Seguimiento activado.";
 "Close" = "Cerrar";
 "Try again" = "Reintentar";

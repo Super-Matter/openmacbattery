@@ -47,10 +47,8 @@
 "%@ is consuming %@ battery" = "%@ потребляет %@ батареи";
 
 /* Live watts card */
-"Charging now (~%@ W in)" = "Заряжается (~%@ Вт)";
 "Battery charging: ~%@ W" = "Зарядка батареи: примерно %@ Вт";
-"Drawing now: %@ watts" = "Текущее потребление: %@ Вт";
-"Total draw: %@ W" = "Общее потребление: %@ Вт";
+"Battery draw: ~%@ W" = "Потребление от батареи: примерно %@ Вт";
 "Display (estimated): %.1f W" = "Экран (оценка): %.1f Вт";
 "Brightness: %d%%" = "Яркость: %d%%";
 "Adapter: %d W" = "Адаптер: %d Вт";
@@ -105,7 +103,6 @@
 
 /* Tip card */
 "You're on battery — %@ is using %lld%% of app energy" = "Вы работаете от батареи — на %@ приходится %2$lld%% энергопотребления приложений";
-"Battery draw: ~%@ W" = "Потребление от батареи: ~%@ Вт";
 "10×+ usual" = "в 10 и более раз обычно";
 "%.0f× usual" = "в %.0f раз обычно";
 "Could not read data: %@" = "Не удалось прочитать данные: %@";

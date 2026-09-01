@@ -19,6 +19,9 @@
 "All measurements" = "Alle Messungen";
 "Show system services" = "Systemdienste anzeigen";
 "Settings…" = "Einstellungen…";
+"Display options and settings" = "Anzeigeoptionen und Einstellungen";
+"Showing measurements taken while on battery — click to include all" = "Messungen im Akkubetrieb — klicken, um alle einzubeziehen";
+"Showing all measurements — click to filter to battery only" = "Alle Messungen — klicken, um nur den Akkubetrieb anzuzeigen";
 "Battery details (⌥⌘B)" = "Akku-Details (⌥⌘B)";
 
 /* Sidebar */
@@ -43,7 +46,7 @@
 "Unsaved changes may be lost." = "Ungespeicherte Änderungen können verloren gehen.";
 
 /* Live watts */
-"Charging now (~%@ W in)" = "Lädt gerade (~%@ W rein)";
+"Battery charging: ~%@ W" = "Akku wird geladen: ~%@ W";
 "Battery draw: ~%@ W" = "Akkuleistung: ~%@ W";
 
 /* Battery life */
@@ -107,7 +110,6 @@
 "Native macOS processor/task energy estimate; not total battery energy." = "Native macOS-Schätzung der Prozessor-/Task-Energie; nicht der gesamte Akkuverbrauch.";
 "Share of battery-only app energy" = "Anteil der App-Energie im Akkubetrieb";
 "Share of all app energy" = "Anteil der gesamten App-Energie";
-"Battery share" = "Akkuanteil";
 "CPU time" = "CPU-Zeit";
 "Wakeups" = "Aufwachvorgänge";
 
@@ -164,7 +166,6 @@
 "Open error log" = "Fehlerlog öffnen";
 "Open data folder" = "Datenordner öffnen";
 "Diagnostics" = "Diagnose";
-"Calibration" = "Kalibrierung";
 "Copy command" = "Befehl kopieren";
 "Remove background tracking entirely" = "Hintergrundverfolgung vollständig entfernen";
 "Advanced" = "Erweitert";
@@ -174,7 +175,6 @@
 "Checks every running app on your Mac once per minute." = "Prüft jede App auf deinem Mac einmal pro Minute.";
 "Tells you which app drained your battery — looking back, not just now." = "Zeigt rückblickend, welche App deinen Akku entladen hat.";
 "Your data stays on this Mac. Nothing is sent over the network." = "Deine Daten bleiben auf diesem Mac. Nichts wird übers Netz gesendet.";
-"Uses almost no battery itself (~1-2 joules per hour)." = "Verbraucht selbst kaum Akku (~1-2 Joule pro Stunde).";
 "Background tracking enabled." = "Hintergrundverfolgung aktiviert.";
 "Close" = "Schließen";
 "Try again" = "Erneut versuchen";

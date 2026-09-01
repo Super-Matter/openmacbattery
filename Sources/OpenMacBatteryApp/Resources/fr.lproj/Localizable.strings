@@ -16,6 +16,9 @@
 "All measurements" = "Toutes les mesures";
 "Show system services" = "Afficher les services système";
 "Settings…" = "Réglages…";
+"Display options and settings" = "Options d’affichage et réglages";
+"Showing measurements taken while on battery — click to include all" = "Affichage des mesures sur batterie — cliquez pour tout inclure";
+"Showing all measurements — click to filter to battery only" = "Affichage de toutes les mesures — cliquez pour filtrer sur batterie";
 "Battery details (⌥⌘B)" = "Détails de la batterie (⌥⌘B)";
 
 "%lld apps" = "%lld apps";
@@ -37,7 +40,7 @@
 "Cancel" = "Annuler";
 "Unsaved changes may be lost." = "Les modifications non enregistrées peuvent être perdues.";
 
-"Charging now (~%@ W in)" = "En charge (~%@ W entrant)";
+"Battery charging: ~%@ W" = "Batterie en charge : ~%@ W";
 "Battery draw: ~%@ W" = "Consommation de la batterie : ~%@ W";
 
 "%lld%% · charging — full in %@" = "%1$lld %% · en charge — plein dans %2$@";
@@ -94,7 +97,6 @@
 "Native macOS processor/task energy estimate; not total battery energy." = "Estimation native macOS de l'énergie du processeur/de la tâche ; pas la consommation totale de la batterie.";
 "Share of battery-only app energy" = "Part de l'énergie des apps sur batterie";
 "Share of all app energy" = "Part de l'énergie de toutes les apps";
-"Battery share" = "Part de batterie";
 "CPU time" = "Temps CPU";
 "Wakeups" = "Réveils";
 
@@ -146,7 +148,6 @@
 "Open error log" = "Ouvrir le journal d'erreurs";
 "Open data folder" = "Ouvrir le dossier de données";
 "Diagnostics" = "Diagnostic";
-"Calibration" = "Calibration";
 "Copy command" = "Copier la commande";
 "Remove background tracking entirely" = "Supprimer complètement le suivi";
 "Advanced" = "Avancé";
@@ -155,7 +156,6 @@
 "Checks every running app on your Mac once per minute." = "Vérifie chaque app en cours sur votre Mac une fois par minute.";
 "Tells you which app drained your battery — looking back, not just now." = "Vous indique quelle app a vidé votre batterie — passé compris, pas seulement maintenant.";
 "Your data stays on this Mac. Nothing is sent over the network." = "Vos données restent sur ce Mac. Rien n'est envoyé sur le réseau.";
-"Uses almost no battery itself (~1-2 joules per hour)." = "N'utilise presque pas de batterie (~1-2 joules par heure).";
 "Background tracking enabled." = "Suivi activé.";
 "Close" = "Fermer";
 "Try again" = "Réessayer";

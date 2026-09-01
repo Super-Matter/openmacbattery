@@ -16,6 +16,9 @@
 "All measurements" = "すべての測定";
 "Show system services" = "システムサービスを表示";
 "Settings…" = "設定…";
+"Display options and settings" = "表示オプションと設定";
+"Showing measurements taken while on battery — click to include all" = "バッテリー駆動時の測定を表示中 — クリックですべて表示";
+"Showing all measurements — click to filter to battery only" = "すべての測定を表示中 — クリックでバッテリー駆動時のみ表示";
 "Battery details (⌥⌘B)" = "バッテリー詳細 (⌥⌘B)";
 
 "%lld apps" = "%lld 個のApp";
@@ -37,7 +40,7 @@
 "Cancel" = "キャンセル";
 "Unsaved changes may be lost." = "未保存の変更が失われる可能性があります。";
 
-"Charging now (~%@ W in)" = "充電中 (~%@ W入力)";
+"Battery charging: ~%@ W" = "バッテリー充電中: 約 %@ W";
 "Battery draw: ~%@ W" = "バッテリー消費: 約 %@ W";
 
 "%lld%% · charging — full in %@" = "%1$lld%% · 充電中 — %2$@ で満充電";
@@ -94,7 +97,6 @@
 "Native macOS processor/task energy estimate; not total battery energy." = "macOS のプロセッサー/タスクエネルギーの推定値。バッテリー全体の消費量ではありません。";
 "Share of battery-only app energy" = "バッテリー駆動時のアプリエネルギー比率";
 "Share of all app energy" = "すべてのアプリエネルギー比率";
-"Battery share" = "バッテリー比率";
 "CPU time" = "CPU 時間";
 "Wakeups" = "ウェイクアップ";
 
@@ -146,7 +148,6 @@
 "Open error log" = "エラーログを開く";
 "Open data folder" = "データフォルダを開く";
 "Diagnostics" = "診断";
-"Calibration" = "キャリブレーション";
 "Copy command" = "コマンドをコピー";
 "Remove background tracking entirely" = "バックグラウンド追跡を完全に削除";
 "Advanced" = "詳細";
@@ -155,7 +156,6 @@
 "Checks every running app on your Mac once per minute." = "Mac で実行中のすべてのAppを毎分チェックします。";
 "Tells you which app drained your battery — looking back, not just now." = "どのAppがバッテリーを消費したかを過去に遡って表示します。";
 "Your data stays on this Mac. Nothing is sent over the network." = "データはこの Mac だけに保存されます。ネットワーク送信はありません。";
-"Uses almost no battery itself (~1-2 joules per hour)." = "本体はほとんど電力を使いません (1時間あたり約1〜2ジュール)。";
 "Background tracking enabled." = "バックグラウンド追跡が有効になりました。";
 "Close" = "閉じる";
 "Try again" = "再試行";

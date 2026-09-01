@@ -46,7 +46,7 @@
 "Unsaved changes may be lost." = "未保存的更改可能会丢失。";
 
 /* Live watts card */
-"Charging now (~%@ W in)" = "正在充电 (输入约 %@ W)";
+"Battery charging: ~%@ W" = "电池充电中: 约 %@ W";
 "Battery draw: ~%@ W" = "电池消耗: 约 %@ W";
 
 /* Battery life card */
@@ -113,7 +113,6 @@
 "Native macOS processor/task energy estimate; not total battery energy." = "macOS 原生处理器/任务能耗估算；不是电池总耗电量。";
 "Share of battery-only app energy" = "仅电池供电时的应用能耗占比";
 "Share of all app energy" = "所有应用能耗占比";
-"Battery share" = "电池占比";
 "CPU time" = "CPU 时间";
 "Wakeups" = "唤醒次数";
 
@@ -171,7 +170,6 @@
 "Open error log" = "打开错误日志";
 "Open data folder" = "打开数据文件夹";
 "Diagnostics" = "诊断";
-"Calibration" = "校准";
 "Copy command" = "复制命令";
 "Remove background tracking entirely" = "完全移除后台跟踪";
 "Advanced" = "高级";
@@ -185,7 +183,6 @@
 "Checks every running app on your Mac once per minute." = "每分钟检查一次 Mac 上运行的所有应用。";
 "Tells you which app drained your battery — looking back, not just now." = "告诉您哪个应用消耗了电池 — 不只是当下,还有过去。";
 "Your data stays on this Mac. Nothing is sent over the network." = "数据仅保存在此 Mac 上。不会发送到网络。";
-"Uses almost no battery itself (~1-2 joules per hour)." = "本身几乎不耗电 (每小时约 1-2 焦耳)。";
 "Background tracking enabled." = "后台跟踪已启用。";
 "Close" = "关闭";
 "Try again" = "重试";

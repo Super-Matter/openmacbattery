@@ -47,10 +47,8 @@
 "%@ is consuming %@ battery" = "%@ is consuming %@ battery";
 
 /* Live watts card */
-"Charging now (~%@ W in)" = "Charging now (~%@ W in)";
 "Battery charging: ~%@ W" = "Battery charging: ~%@ W";
-"Drawing now: %@ watts" = "Drawing now: %@ watts";
-"Total draw: %@ W" = "Total draw: %@ W";
+"Battery draw: ~%@ W" = "Battery draw: ~%@ W";
 "Adapter: %d W" = "Adapter: %d W";
 "Adapter" = "Adapter";
 "Display (estimated): %.1f W" = "Display (estimated): %.1f W";
@@ -105,7 +103,6 @@
 
 /* Tip card */
 "You're on battery — %@ is using %lld%% of app energy" = "You're on battery — %1$@ is using %2$lld%% of app energy";
-"Battery draw: ~%@ W" = "Battery draw: ~%@ W";
 "10×+ usual" = "10×+ usual";
 "%.0f× usual" = "%.0f× usual";
 "Could not read data: %@" = "Could not read data: %@";
