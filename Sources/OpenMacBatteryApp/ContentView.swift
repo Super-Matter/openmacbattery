@@ -46,10 +46,7 @@ struct MainToolbar: ToolbarContent {
             Menu {
                 Toggle("Show system services", isOn: $model.showSystem)
                 Divider()
-                Button("Settings…") {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-                }
-                .keyboardShortcut(",", modifiers: .command)
+                SettingsMenuItem()
             } label: {
                 Image(systemName: "slider.horizontal.3")
             }
@@ -913,6 +910,8 @@ struct SummaryCards: View {
     var body: some View {
         HStack(spacing: 12) {
             StatCard(label: "Energy share", value: shareString, accent: Color(app.level.color))
+            StatCard(label: "Processor energy", value: processorEnergy)
+                .help("Native macOS processor/task energy estimate; not total battery energy.")
             StatCard(label: "CPU time", value: EnergyFormatter.formatCpuNs(app.cpuNs))
             StatCard(label: "Wakeups", value: EnergyFormatter.formatCount(app.wakeups))
             StatCard(label: "Range", value: rangeText)
@@ -922,6 +921,10 @@ struct SummaryCards: View {
         let p = model.sharePercent(of: app)
         if p < 0.1 { return "<0.1%" }
         return String(format: "%.1f%%", p)
+    }
+    private var processorEnergy: String {
+        guard let factor = model.stats.calibrationFactor else { return "—" }
+        return EnergyFormatter.format(rawEnergy: app.energyRaw, factor: factor)
     }
     private var rangeText: String {
         NSLocalizedString(model.range.displayKey, comment: "")

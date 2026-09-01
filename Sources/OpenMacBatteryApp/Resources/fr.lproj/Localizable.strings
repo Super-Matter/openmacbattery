@@ -38,7 +38,7 @@
 "Unsaved changes may be lost." = "Les modifications non enregistrées peuvent être perdues.";
 
 "Charging now (~%@ W in)" = "En charge (~%@ W entrant)";
-"Drawing now: %@ watts" = "Consommation : %@ watts";
+"Battery draw: ~%@ W" = "Consommation de la batterie : ~%@ W";
 
 "%lld%% · charging — full in %@" = "%1$lld %% · en charge — plein dans %2$@";
 "%lld%% · charging" = "%lld %% · en charge";
@@ -63,13 +63,22 @@
 "asleep for %@" = "en veille pendant %@";
 "battery %lld%% → %lld%%" = "batterie %1$lld %% → %2$lld %%";
 
-"Compared to the previous %@" = "Comparé à %@ précédente";
+"Compared with %@" = "Comparé à %@";
 "Need a bit more data to compare with previous period" = "Besoin de plus de données pour comparer avec la période précédente";
-"%lld%% less battery used than the previous %@" = "%1$lld %% de batterie en moins par rapport à %2$@ précédente";
-"%lld%% more battery used than the previous %@" = "%1$lld %% de batterie en plus par rapport à %2$@ précédente";
-"Similar to the previous %@ (%lld%% difference)" = "Similaire à %1$@ précédente (%2$lld %% d'écart)";
+"%lld%% less app energy than %@" = "%1$lld %% d'énergie d'apps en moins que %2$@";
+"%lld%% more app energy than %@" = "%1$lld %% d'énergie d'apps en plus que %2$@";
+"Similar app energy to %@ (%lld%% difference)" = "Énergie d'apps similaire à %1$@ (%2$lld %% d'écart)";
+"the previous hour" = "l'heure précédente";
+"the previous 6 hours" = "les 6 heures précédentes";
+"the previous 24 hours" = "les 24 heures précédentes";
+"the previous week" = "la semaine précédente";
+"the previous month" = "le mois précédent";
 
-"You're on battery — %@ is using %lld%% of your battery load" = "Vous êtes sur batterie — %1$@ utilise %2$lld %% de la charge";
+"You're on battery — %@ is using %lld%% of app energy" = "Vous êtes sur batterie — %1$@ utilise %2$lld %% de l'énergie des apps";
+"10×+ usual" = "10×+ habituel";
+"%.0f× usual" = "%.0f× habituel";
+"Could not read data: %@" = "Impossible de lire les données : %@";
+"Could not read details: %@" = "Impossible de lire les détails : %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "S'il n'a pas besoin de tourner en arrière-plan, pensez à le quitter.";
 
 "%@ was active for %lld hours %lld minutes" = "%1$@ a été actif %2$lld heures %3$lld minutes";
@@ -80,6 +89,11 @@
 "Try a different time range from the toolbar." = "Essayez une autre plage depuis la barre d'outils.";
 "System" = "Système";
 
+"Energy share" = "Part d'énergie";
+"Processor energy" = "Énergie du processeur";
+"Native macOS processor/task energy estimate; not total battery energy." = "Estimation native macOS de l'énergie du processeur/de la tâche ; pas la consommation totale de la batterie.";
+"Share of battery-only app energy" = "Part de l'énergie des apps sur batterie";
+"Share of all app energy" = "Part de l'énergie de toutes les apps";
 "Battery share" = "Part de batterie";
 "CPU time" = "Temps CPU";
 "Wakeups" = "Réveils";

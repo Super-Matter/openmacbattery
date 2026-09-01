@@ -47,7 +47,7 @@
 
 /* Live watts card */
 "Charging now (~%@ W in)" = "正在充电 (输入约 %@ W)";
-"Drawing now: %@ watts" = "当前消耗: %@ 瓦";
+"Battery draw: ~%@ W" = "电池消耗: 约 %@ W";
 
 /* Battery life card */
 "%lld%% · charging — full in %@" = "%1$lld%% · 充电中 — %2$@ 后充满";
@@ -77,14 +77,23 @@
 "battery %lld%% → %lld%%" = "电池 %1$lld%% → %2$lld%%";
 
 /* Compare card */
-"Compared to the previous %@" = "与上一个%@相比";
-"Need a bit more data to compare with previous period" = "需要更多数据才能与上一个周期比较";
-"%lld%% less battery used than the previous %@" = "比上一个%2$@少用了 %1$lld%% 的电量";
-"%lld%% more battery used than the previous %@" = "比上一个%2$@多用了 %1$lld%% 的电量";
-"Similar to the previous %@ (%lld%% difference)" = "与上一个%1$@相似 (差异 %2$lld%%)";
+"Compared with %@" = "与%@相比";
+"Need a bit more data to compare with previous period" = "需要更多数据才能与之前的周期比较";
+"%lld%% less app energy than %@" = "应用能耗比%2$@少 %1$lld%%";
+"%lld%% more app energy than %@" = "应用能耗比%2$@多 %1$lld%%";
+"Similar app energy to %@ (%lld%% difference)" = "应用能耗与%1$@相近 (差异 %2$lld%%)";
+"the previous hour" = "之前的一小时";
+"the previous 6 hours" = "之前的6小时";
+"the previous 24 hours" = "之前的24小时";
+"the previous week" = "之前的一周";
+"the previous month" = "之前的一个月";
 
 /* Tip card */
-"You're on battery — %@ is using %lld%% of your battery load" = "您在使用电池 — %1$@ 占用了电池负载的 %2$lld%%";
+"You're on battery — %@ is using %lld%% of app energy" = "您正在使用电池 — %1$@ 占用了应用能耗的 %2$lld%%";
+"10×+ usual" = "通常的10倍以上";
+"%.0f× usual" = "通常的%.0f倍";
+"Could not read data: %@" = "无法读取数据: %@";
+"Could not read details: %@" = "无法读取详细信息: %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "若电池供电时无需后台运行,考虑退出它。";
 
 /* Narrative card */
@@ -99,6 +108,11 @@
 "System" = "系统";
 
 /* Summary cards */
+"Energy share" = "能耗占比";
+"Processor energy" = "处理器能耗";
+"Native macOS processor/task energy estimate; not total battery energy." = "macOS 原生处理器/任务能耗估算；不是电池总耗电量。";
+"Share of battery-only app energy" = "仅电池供电时的应用能耗占比";
+"Share of all app energy" = "所有应用能耗占比";
 "Battery share" = "电池占比";
 "CPU time" = "CPU 时间";
 "Wakeups" = "唤醒次数";

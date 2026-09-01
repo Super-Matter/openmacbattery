@@ -125,6 +125,8 @@
 
 /* Summary cards */
 "Energy share" = "Energy share";
+"Processor energy" = "Processor energy";
+"Native macOS processor/task energy estimate; not total battery energy." = "Native macOS processor/task energy estimate; not total battery energy.";
 "Share of battery-only app energy" = "Share of battery-only app energy";
 "Share of all app energy" = "Share of all app energy";
 "CPU time" = "CPU time";

@@ -38,7 +38,7 @@
 "Unsaved changes may be lost." = "未保存の変更が失われる可能性があります。";
 
 "Charging now (~%@ W in)" = "充電中 (~%@ W入力)";
-"Drawing now: %@ watts" = "現在の消費: %@ ワット";
+"Battery draw: ~%@ W" = "バッテリー消費: 約 %@ W";
 
 "%lld%% · charging — full in %@" = "%1$lld%% · 充電中 — %2$@ で満充電";
 "%lld%% · charging" = "%lld%% · 充電中";
@@ -63,13 +63,22 @@
 "asleep for %@" = "スリープ %@";
 "battery %lld%% → %lld%%" = "バッテリー %1$lld%% → %2$lld%%";
 
-"Compared to the previous %@" = "前回の%@との比較";
-"Need a bit more data to compare with previous period" = "前期間と比較するにはもう少しデータが必要です";
-"%lld%% less battery used than the previous %@" = "前回の%2$@より %1$lld%% 少なく使用";
-"%lld%% more battery used than the previous %@" = "前回の%2$@より %1$lld%% 多く使用";
-"Similar to the previous %@ (%lld%% difference)" = "前回の%1$@と同程度 (%2$lld%% の差)";
+"Compared with %@" = "%@との比較";
+"Need a bit more data to compare with previous period" = "前の期間と比較するにはもう少しデータが必要です";
+"%lld%% less app energy than %@" = "%2$@よりアプリのエネルギーが %1$lld%% 少ない";
+"%lld%% more app energy than %@" = "%2$@よりアプリのエネルギーが %1$lld%% 多い";
+"Similar app energy to %@ (%lld%% difference)" = "%1$@とアプリのエネルギーは同程度 (%2$lld%% の差)";
+"the previous hour" = "前の1時間";
+"the previous 6 hours" = "前の6時間";
+"the previous 24 hours" = "前の24時間";
+"the previous week" = "前の1週間";
+"the previous month" = "前の1か月";
 
-"You're on battery — %@ is using %lld%% of your battery load" = "バッテリー駆動中 — %1$@ がバッテリー負荷の %2$lld%% を消費";
+"You're on battery — %@ is using %lld%% of app energy" = "バッテリー駆動中 — %1$@ がアプリのエネルギーの %2$lld%% を使用";
+"10×+ usual" = "通常の10倍以上";
+"%.0f× usual" = "通常の%.0f倍";
+"Could not read data: %@" = "データを読み取れませんでした: %@";
+"Could not read details: %@" = "詳細を読み取れませんでした: %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "バックグラウンド実行が不要なら終了を検討してください。";
 
 "%@ was active for %lld hours %lld minutes" = "%1$@ は %2$lld 時間 %3$lld 分間アクティブ";
@@ -80,6 +89,11 @@
 "Try a different time range from the toolbar." = "ツールバーから別の時間範囲を試してください。";
 "System" = "システム";
 
+"Energy share" = "エネルギー比率";
+"Processor energy" = "プロセッサーエネルギー";
+"Native macOS processor/task energy estimate; not total battery energy." = "macOS のプロセッサー/タスクエネルギーの推定値。バッテリー全体の消費量ではありません。";
+"Share of battery-only app energy" = "バッテリー駆動時のアプリエネルギー比率";
+"Share of all app energy" = "すべてのアプリエネルギー比率";
 "Battery share" = "バッテリー比率";
 "CPU time" = "CPU 時間";
 "Wakeups" = "ウェイクアップ";

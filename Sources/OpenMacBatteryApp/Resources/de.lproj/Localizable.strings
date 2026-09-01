@@ -44,7 +44,7 @@
 
 /* Live watts */
 "Charging now (~%@ W in)" = "Lädt gerade (~%@ W rein)";
-"Drawing now: %@ watts" = "Aktuell: %@ Watt";
+"Battery draw: ~%@ W" = "Akkuleistung: ~%@ W";
 
 /* Battery life */
 "%lld%% · charging — full in %@" = "%1$lld %% · lädt — voll in %2$@";
@@ -72,14 +72,23 @@
 "battery %lld%% → %lld%%" = "Akku %1$lld %% → %2$lld %%";
 
 /* Compare */
-"Compared to the previous %@" = "Vergleich zur vorherigen %@";
-"Need a bit more data to compare with previous period" = "Mehr Daten nötig für Vergleich mit vorherigem Zeitraum";
-"%lld%% less battery used than the previous %@" = "%1$lld %% weniger Akku verbraucht als %2$@ zuvor";
-"%lld%% more battery used than the previous %@" = "%1$lld %% mehr Akku verbraucht als %2$@ zuvor";
-"Similar to the previous %@ (%lld%% difference)" = "Ähnlich wie %1$@ zuvor (%2$lld %% Differenz)";
+"Compared with %@" = "Verglichen mit %@";
+"Need a bit more data to compare with previous period" = "Mehr Daten nötig für den Vergleich mit dem vorherigen Zeitraum";
+"%lld%% less app energy than %@" = "%1$lld %% weniger App-Energie als %2$@";
+"%lld%% more app energy than %@" = "%1$lld %% mehr App-Energie als %2$@";
+"Similar app energy to %@ (%lld%% difference)" = "Ähnliche App-Energie wie %1$@ (%2$lld %% Unterschied)";
+"the previous hour" = "der vorherigen Stunde";
+"the previous 6 hours" = "den vorherigen 6 Stunden";
+"the previous 24 hours" = "den vorherigen 24 Stunden";
+"the previous week" = "der vorherigen Woche";
+"the previous month" = "dem vorherigen Monat";
 
 /* Tip card */
-"You're on battery — %@ is using %lld%% of your battery load" = "Du bist im Akkubetrieb — %1$@ nutzt %2$lld %% der Akkulast";
+"You're on battery — %@ is using %lld%% of app energy" = "Du bist im Akkubetrieb — %1$@ nutzt %2$lld %% der App-Energie";
+"10×+ usual" = "10×+ üblich";
+"%.0f× usual" = "%.0f× üblich";
+"Could not read data: %@" = "Daten konnten nicht gelesen werden: %@";
+"Could not read details: %@" = "Details konnten nicht gelesen werden: %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "Falls es im Akkubetrieb nicht im Hintergrund laufen muss, beende es.";
 
 /* Narrative */
@@ -93,6 +102,11 @@
 "System" = "System";
 
 /* Summary cards */
+"Energy share" = "Anteil der App-Energie";
+"Processor energy" = "Prozessorenergie";
+"Native macOS processor/task energy estimate; not total battery energy." = "Native macOS-Schätzung der Prozessor-/Task-Energie; nicht der gesamte Akkuverbrauch.";
+"Share of battery-only app energy" = "Anteil der App-Energie im Akkubetrieb";
+"Share of all app energy" = "Anteil der gesamten App-Energie";
 "Battery share" = "Akkuanteil";
 "CPU time" = "CPU-Zeit";
 "Wakeups" = "Aufwachvorgänge";

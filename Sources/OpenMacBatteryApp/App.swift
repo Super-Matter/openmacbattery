@@ -44,6 +44,7 @@ struct OpenMacBatteryApp: App {
             }
             CommandGroup(replacing: .appInfo) {
                 Button("About OpenMacBattery") { AboutPanel.show() }
+                SettingsMenuItem()
                 Divider()
                 BatteryDetailsWindowOpener()
                 LanguageMenuItem()
@@ -68,6 +69,17 @@ struct OpenMacBatteryApp: App {
                 .environmentObject(model)
         }
         .windowResizability(.contentSize)
+    }
+}
+
+struct SettingsMenuItem: View {
+    @Environment(\.openSettings) private var openSettings
+
+    var body: some View {
+        Button("Settings…") {
+            openSettings()
+        }
+        .keyboardShortcut(",", modifiers: .command)
     }
 }
 

@@ -48,7 +48,7 @@
 
 /* Live watts card */
 "Charging now (~%@ W in)" = "Şu an şarj oluyor (~%@ W giriyor)";
-"Drawing now: %@ watts" = "Şu an çekiliyor: %@ watt";
+"Battery draw: ~%@ W" = "Pil çekişi: ~%@ W";
 
 /* Battery life card — positional args */
 "%lld%% · charging — full in %@" = "%%%1$lld · şarj oluyor — tam dolu %2$@ sonra";
@@ -78,15 +78,23 @@
 "battery %lld%% → %lld%%" = "pil %%%1$lld → %%%2$lld";
 
 /* Compare card */
-"Compared to the previous %@" = "Bir önceki %@ ile karşılaştırma";
+"Compared with %@" = "%@ ile karşılaştırıldığında";
 "Need a bit more data to compare with previous period" = "Önceki dönemle karşılaştırma için biraz daha veri gerek";
-/* Compare — Swift args: (Int absVal, String cmp) */
-"%lld%% less battery used than the previous %@" = "Bu %2$@ öncekinden %%%1$lld daha az pil tükettin";
-"%lld%% more battery used than the previous %@" = "Bu %2$@ öncekinden %%%1$lld daha fazla pil tükettin";
-"Similar to the previous %@ (%lld%% difference)" = "Bu %1$@ öncekiyle benzer (%%%2$lld fark)";
+"%lld%% less app energy than %@" = "%2$@ dönemine göre uygulama enerjisi %1$lld%% daha az";
+"%lld%% more app energy than %@" = "%2$@ dönemine göre uygulama enerjisi %1$lld%% daha fazla";
+"Similar app energy to %@ (%lld%% difference)" = "%1$@ dönemine göre uygulama enerjisi benzer (fark %2$lld%%)";
+"the previous hour" = "önceki saat";
+"the previous 6 hours" = "önceki 6 saat";
+"the previous 24 hours" = "önceki 24 saat";
+"the previous week" = "önceki hafta";
+"the previous month" = "önceki ay";
 
 /* Tip card — Swift args: (String displayName, Int p) */
-"You're on battery — %@ is using %lld%% of your battery load" = "Şu an pildesin — %1$@ pil yükünün %%%2$lld'ünü tüketiyor";
+"You're on battery — %@ is using %lld%% of app energy" = "Şu an pildesin — %1$@ uygulama enerjisinin %2$lld%%'ünü kullanıyor";
+"10×+ usual" = "normalden 10 kat fazla";
+"%.0f× usual" = "normalden %.0f kat fazla";
+"Could not read data: %@" = "Veri okunamadı: %@";
+"Could not read details: %@" = "Ayrıntılar okunamadı: %@";
 "If it doesn't need to run in the background while on battery, consider quitting it." = "Pildeyken arka planda çalışmasına gerek yoksa kapatmayı düşünebilirsin.";
 
 /* Narrative card — Swift args: (displayName, h, m) */
@@ -101,6 +109,11 @@
 "System" = "Sistem";
 
 /* Summary cards */
+"Energy share" = "Enerji payı";
+"Processor energy" = "İşlemci enerjisi";
+"Native macOS processor/task energy estimate; not total battery energy." = "Yerel macOS işlemci/görev enerjisi tahmini; toplam pil enerjisi değildir.";
+"Share of battery-only app energy" = "Sadece pildeki uygulama enerjisi payı";
+"Share of all app energy" = "Tüm uygulama enerjisi payı";
 "Battery share" = "Pildeki payı";
 "CPU time" = "Çalışma süresi";
 "Wakeups" = "Uyandırma";
