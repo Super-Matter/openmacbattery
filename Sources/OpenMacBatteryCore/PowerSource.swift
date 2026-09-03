@@ -192,6 +192,12 @@ public enum PowerSourceReader {
         return nil
     }
 
+    private static func configuredChargeLimit() -> Int? {
+        let defaults = UserDefaults(suiteName: "com.apple.batteryui.charging.mac")
+        let limit = defaults?.integer(forKey: "com.apple.batteryui.charging.mac.prior.limit") ?? 0
+        return (50...100).contains(limit) ? limit : nil
+    }
+
     public static func batterySnapshot() -> BatterySnapshot? {
         let svc = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
         guard svc != IO_OBJECT_NULL else { return nil }
@@ -222,10 +228,10 @@ public enum PowerSourceReader {
         let cycles = (dict["CycleCount"] as? Int) ?? 0
         let temp = Double((dict["Temperature"] as? Int) ?? 0) / 100.0
         let serial = dict["Serial"] as? String
-        let batteryData = dict["BatteryData"] as? [String: Any]
-        let chargeLimit = (batteryData?["DailyMaxSoc"] as? Int).flatMap {
-            (50...100).contains($0) ? $0 : nil
-        }
+        // DailyMaxSoc is macOS's adaptive daily target, not the user's
+        // configured charge limit. The selected limit is stored by Battery
+        // settings in its own user-defaults domain.
+        let chargeLimit = configuredChargeLimit()
         let adapter = (dict["AdapterDetails"] as? [String: Any])
             ?? (dict["AppleRawAdapterDetails"] as? [String: Any])
 
