@@ -219,4 +219,4 @@ Inspired by [Stats](https://github.com/exelban/stats), [htop](https://htop.dev/)
 
 ## Status
 
-**v0.2.0 — early preview.** The data layer, daemon, GUI, and i18n are functional. Needs more testing on diverse Mac configurations and native-speaker review of translations.
+**v0.2.1 — early preview.** The data layer, daemon, GUI, and i18n are functional. Needs more testing on diverse Mac configurations and native-speaker review of translations.
