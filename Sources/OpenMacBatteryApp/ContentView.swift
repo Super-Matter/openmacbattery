@@ -68,18 +68,7 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    Text(String(format: NSLocalizedString("%lld apps", comment: ""), model.apps.count))
-                        .font(.caption).foregroundStyle(.secondary)
-                    Spacer()
-                    Text(model.range.displayName).font(.caption).foregroundStyle(.secondary)
-                }
-                Text(model.onBattery ? "Share of battery-only app energy" : "Share of all app energy")
-                    .font(.caption2).foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            SidebarHeader()
             Divider()
 
             if model.apps.isEmpty {
@@ -99,6 +88,97 @@ struct SidebarView: View {
 
             Divider()
             StatsFooter()
+        }
+    }
+}
+
+struct SidebarHeader: View {
+    @EnvironmentObject var model: AppModel
+    @State private var showGuide = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(String(format: NSLocalizedString("%lld apps", comment: ""), model.apps.count))
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Text(model.range.displayName).font(.caption).foregroundStyle(.secondary)
+            }
+            Text(model.onBattery ? "Share of battery-only app energy" : "Share of all app energy")
+                .font(.caption2).foregroundStyle(.secondary)
+            HStack(spacing: 5) {
+                Image(systemName: "chart.xyaxis.line")
+                Text("App activity")
+                Spacer(minLength: 4)
+                Text("earlier")
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 8, weight: .semibold))
+                Text("now")
+                Button {
+                    showGuide.toggle()
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+                .buttonStyle(.borderless)
+                .help("How to read app activity")
+                .popover(isPresented: $showGuide, arrowEdge: .top) {
+                    SidebarChartGuide()
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+    }
+}
+
+struct SidebarChartGuide: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("How to read app activity", systemImage: "chart.xyaxis.line")
+                .font(.headline)
+
+            Text("Each mini graph shows this app's processor-energy pattern across the selected time range.")
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 8) {
+                guideRow("Left = earlier", description: "The graph runs from the start of the selected range to now.", systemImage: "arrow.left")
+                guideRow("Taller = more energy", description: "A peak marks a busier period for that app.", systemImage: "chart.bar.fill")
+                guideRow("Flat = little or no activity", description: "No visible peak means little recorded app activity in that period.", systemImage: "minus")
+            }
+
+            Divider()
+
+            Text("Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("The range and On battery only filter in the toolbar change what the graphs include.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(width: 300, alignment: .leading)
+    }
+
+    private func guideRow(_ title: LocalizedStringKey,
+                         description: LocalizedStringKey,
+                         systemImage: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: systemImage)
+                .frame(width: 16)
+                .foregroundStyle(Color.accentColor)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.caption).fontWeight(.medium)
+                Text(description)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }
@@ -294,28 +374,45 @@ struct Sparkline: View {
             let maxV = max(values.max() ?? 0, 1)
             let n = max(values.count, 1)
             let stepX = geo.size.width / CGFloat(max(n - 1, 1))
+            let yPosition: (Double) -> CGFloat = { value in
+                geo.size.height - CGFloat(min(1, max(0, value) / maxV)) * geo.size.height
+            }
+
+            Path { path in
+                path.move(to: CGPoint(x: 0, y: geo.size.height - 0.5))
+                path.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height - 0.5))
+            }
+            .stroke(Color.secondary.opacity(0.22), style: StrokeStyle(lineWidth: 0.5, dash: [2, 2]))
+
             Path { path in
                 for (i, v) in values.enumerated() {
                     let x = CGFloat(i) * stepX
-                    let y = geo.size.height - CGFloat(v / maxV) * geo.size.height
+                    let y = yPosition(v)
                     if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
                     else { path.addLine(to: CGPoint(x: x, y: y)) }
                 }
             }
-            .stroke(color.opacity(0.85), style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
+            .stroke(color.opacity(0.9), style: StrokeStyle(lineWidth: 1.4, lineCap: .round, lineJoin: .round))
+
             Path { path in
                 guard !values.isEmpty else { return }
                 path.move(to: CGPoint(x: 0, y: geo.size.height))
                 for (i, v) in values.enumerated() {
                     let x = CGFloat(i) * stepX
-                    let y = geo.size.height - CGFloat(v / maxV) * geo.size.height
-                    path.addLine(to: CGPoint(x: x, y: y))
+                    path.addLine(to: CGPoint(x: x, y: yPosition(v)))
                 }
                 path.addLine(to: CGPoint(x: geo.size.width, y: geo.size.height))
                 path.closeSubpath()
             }
             .fill(color.opacity(0.18))
         }
+        .padding(2)
+        .background(RoundedRectangle(cornerRadius: 3).fill(color.opacity(0.05)))
+        .overlay {
+            RoundedRectangle(cornerRadius: 3)
+                .stroke(color.opacity(0.18), lineWidth: 0.5)
+        }
+        .help("App activity over time — left is earlier, right is now; taller means more energy in that period.")
     }
 }
 

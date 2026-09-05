@@ -127,6 +127,22 @@
 "Top consumers" = "主要消耗者";
 "No data." = "无数据。";
 
+/* Sidebar chart guide */
+"App activity" = "应用活动";
+"earlier" = "较早";
+"now" = "现在";
+"How to read app activity" = "如何阅读应用活动";
+"Each mini graph shows this app's processor-energy pattern across the selected time range." = "每个迷你图显示此应用在所选时间范围内的处理器能耗模式。";
+"Left = earlier" = "左侧 = 较早";
+"The graph runs from the start of the selected range to now." = "图表从所选范围的开始时间显示到现在。";
+"Taller = more energy" = "越高 = 能耗越多";
+"A peak marks a busier period for that app." = "峰值表示该应用活动较多的时段。";
+"Flat = little or no activity" = "平坦 = 活动很少或没有活动";
+"No visible peak means little recorded app activity in that period." = "没有明显峰值表示该时段记录到的应用活动很少。";
+"Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height." = "使用百分比和高 / 中 / 低标记比较应用。每个图表都按该应用自身的峰值缩放，因此应按百分比和标记比较各行，而不是按图表高度比较。";
+"The range and On battery only filter in the toolbar change what the graphs include." = "工具栏中的时间范围和“仅电池供电”筛选条件会改变图表包含的内容。";
+"App activity over time — left is earlier, right is now; taller means more energy in that period." = "应用活动随时间变化 — 左侧较早，右侧为现在；越高表示该时段能耗越多。";
+
 /* Refresh ring */
 "Live watts · next update in %ds · click to refresh now" = "实时功率 · 下次更新 %d 秒后 · 点击立即刷新";
 

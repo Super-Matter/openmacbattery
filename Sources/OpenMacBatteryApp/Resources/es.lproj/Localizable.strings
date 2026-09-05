@@ -124,6 +124,22 @@
 "Top consumers" = "Mayores consumidores";
 "No data." = "Sin datos.";
 
+/* Sidebar chart guide */
+"App activity" = "Actividad de las apps";
+"earlier" = "antes";
+"now" = "ahora";
+"How to read app activity" = "Cómo leer la actividad de las apps";
+"Each mini graph shows this app's processor-energy pattern across the selected time range." = "Cada mini gráfico muestra el patrón de energía del procesador de esta app durante el periodo seleccionado.";
+"Left = earlier" = "Izquierda = antes";
+"The graph runs from the start of the selected range to now." = "El gráfico va desde el inicio del periodo seleccionado hasta ahora.";
+"Taller = more energy" = "Más alto = más energía";
+"A peak marks a busier period for that app." = "Un pico indica un periodo de mayor actividad para esa app.";
+"Flat = little or no activity" = "Plano = poca o ninguna actividad";
+"No visible peak means little recorded app activity in that period." = "La ausencia de picos visibles indica poca actividad registrada de la app en ese periodo.";
+"Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height." = "Compara las apps mediante el porcentaje y la insignia Alta / Media / Baja. Cada gráfico se escala según el propio pico de la app; compara las filas por porcentaje e insignia, no por la altura del gráfico.";
+"The range and On battery only filter in the toolbar change what the graphs include." = "El periodo y el filtro Solo con batería de la barra de herramientas cambian lo que muestran los gráficos.";
+"App activity over time — left is earlier, right is now; taller means more energy in that period." = "Actividad de las apps a lo largo del tiempo — antes a la izquierda, ahora a la derecha; más alto significa más energía en ese periodo.";
+
 /* Refresh ring */
 "Live watts · next update in %ds · click to refresh now" = "Vatios en vivo · próxima actualización en %ds · haz clic para actualizar";
 

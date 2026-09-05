@@ -140,6 +140,22 @@
 "Top consumers" = "Основные потребители";
 "No data." = "Нет данных.";
 
+/* Sidebar chart guide */
+"App activity" = "Активность приложений";
+"earlier" = "раньше";
+"now" = "сейчас";
+"How to read app activity" = "Как читать активность приложений";
+"Each mini graph shows this app's processor-energy pattern across the selected time range." = "Каждый мини-график показывает энергопотребление процессора этого приложения за выбранный период.";
+"Left = earlier" = "Слева = раньше";
+"The graph runs from the start of the selected range to now." = "График идёт от начала выбранного периода до текущего момента.";
+"Taller = more energy" = "Выше = больше энергии";
+"A peak marks a busier period for that app." = "Пик показывает период большей активности приложения.";
+"Flat = little or no activity" = "Ровно = мало активности или её нет";
+"No visible peak means little recorded app activity in that period." = "Отсутствие заметного пика означает, что за этот период записано мало активности приложения.";
+"Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height." = "Сравнивайте приложения по проценту и значку Высокая / Средняя / Низкая. Каждый график масштабируется по собственному пику приложения, поэтому сравнивайте строки по проценту и значку, а не по высоте графика.";
+"The range and On battery only filter in the toolbar change what the graphs include." = "Период и фильтр «Только от батареи» на панели инструментов изменяют содержимое графиков.";
+"App activity over time — left is earlier, right is now; taller means more energy in that period." = "Активность приложений во времени — раньше слева, сейчас справа; высота показывает энергопотребление за период.";
+
 /* Refresh ring */
 "Live watts · next update in %ds · click to refresh now" = "Текущая мощность · обновление через %d с · нажмите для обновления";
 

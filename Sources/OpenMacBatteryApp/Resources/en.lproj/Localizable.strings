@@ -140,6 +140,22 @@
 "Top consumers" = "Top consumers";
 "No data." = "No data.";
 
+/* Sidebar chart guide */
+"App activity" = "App activity";
+"earlier" = "earlier";
+"now" = "now";
+"How to read app activity" = "How to read app activity";
+"Each mini graph shows this app's processor-energy pattern across the selected time range." = "Each mini graph shows this app's processor-energy pattern across the selected time range.";
+"Left = earlier" = "Left = earlier";
+"The graph runs from the start of the selected range to now." = "The graph runs from the start of the selected range to now.";
+"Taller = more energy" = "Taller = more energy";
+"A peak marks a busier period for that app." = "A peak marks a busier period for that app.";
+"Flat = little or no activity" = "Flat = little or no activity";
+"No visible peak means little recorded app activity in that period." = "No visible peak means little recorded app activity in that period.";
+"Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height." = "Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height.";
+"The range and On battery only filter in the toolbar change what the graphs include." = "The range and On battery only filter in the toolbar change what the graphs include.";
+"App activity over time — left is earlier, right is now; taller means more energy in that period." = "App activity over time — left is earlier, right is now; taller means more energy in that period.";
+
 /* Refresh ring */
 "Live watts · next update in %ds · click to refresh now" = "Live watts · next update in %ds · click to refresh now";
 

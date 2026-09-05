@@ -110,6 +110,21 @@
 "Top consumers" = "上位消費者";
 "No data." = "データなし。";
 
+/* Sidebar chart guide */
+"App activity" = "アプリのアクティビティ";
+"earlier" = "過去";
+"now" = "現在";
+"How to read app activity" = "アプリのアクティビティの見方";
+"Each mini graph shows this app's processor-energy pattern across the selected time range." = "各ミニグラフは、選択した期間におけるこのアプリのプロセッサーエネルギーのパターンを示します。";
+"Left = earlier" = "左 = 過去";
+"The graph runs from the start of the selected range to now." = "グラフは選択期間の開始から現在までを表示します。";
+"Taller = more energy" = "高い = エネルギーが多い";
+"A peak marks a busier period for that app." = "ピークは、そのアプリの活動が多かった時間帯を示します。";
+"Flat = little or no activity" = "平坦 = 活動が少ない、またはない";
+"No visible peak means little recorded app activity in that period." = "目立つピークがない場合、その期間に記録されたアプリの活動はほとんどありません。";
+"Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height." = "アプリの比較にはパーセントと高 / 中 / 低のバッジを使います。各グラフはそのアプリ自身のピークを基準に拡大縮小されるため、グラフの高さではなくパーセントとバッジで比較してください。";
+"The range and On battery only filter in the toolbar change what the graphs include." = "ツールバーの期間と「バッテリー駆動時のみ」フィルターによって、グラフの対象が変わります。";
+"App activity over time — left is earlier, right is now; taller means more energy in that period." = "時間ごとのアプリの活動 — 左が過去、右が現在。高いほどその期間のエネルギーが多いことを示します。";
 "Live watts · next update in %ds · click to refresh now" = "リアルタイムワット · 次の更新 %d 秒後 · クリックで即更新";
 
 "Battery Details" = "バッテリー詳細";

@@ -128,6 +128,22 @@
 "Top consumers" = "En çok tüketenler";
 "No data." = "Veri yok.";
 
+/* Sidebar chart guide */
+"App activity" = "Uygulama etkinliği";
+"earlier" = "eski";
+"now" = "şimdi";
+"How to read app activity" = "Uygulama etkinliği nasıl okunur";
+"Each mini graph shows this app's processor-energy pattern across the selected time range." = "Her mini grafik, seçilen zaman aralığında bu uygulamanın işlemci enerjisi düzenini gösterir.";
+"Left = earlier" = "Sol = eski";
+"The graph runs from the start of the selected range to now." = "Grafik, seçilen aralığın başlangıcından şimdiye kadar uzanır.";
+"Taller = more energy" = "Daha yüksek = daha fazla enerji";
+"A peak marks a busier period for that app." = "Bir tepe, uygulamanın daha yoğun olduğu bir dönemi gösterir.";
+"Flat = little or no activity" = "Düz = az veya hiç etkinlik yok";
+"No visible peak means little recorded app activity in that period." = "Görünür tepe olmaması, o dönemde kaydedilen uygulama etkinliğinin az olduğu anlamına gelir.";
+"Use the percentage and High / Medium / Low badge to compare apps. Each graph is scaled to that app's own peak, so compare rows by percentage and badge—not by graph height." = "Uygulamaları karşılaştırmak için yüzdeyi ve Yüksek / Orta / Düşük rozetini kullan. Her grafik o uygulamanın kendi tepesine göre ölçeklenir; satırları grafik yüksekliğine göre değil, yüzde ve rozete göre karşılaştır.";
+"The range and On battery only filter in the toolbar change what the graphs include." = "Araç çubuğundaki aralık ve Yalnızca pilde filtresi grafiklerin içeriğini değiştirir.";
+"App activity over time — left is earlier, right is now; taller means more energy in that period." = "Zaman içinde uygulama etkinliği — eski solda, şimdi sağda; daha yüksek, o dönemde daha fazla enerji demektir.";
+
 /* Refresh ring */
 "Live watts · next update in %ds · click to refresh now" = "Canlı watt · sonraki güncelleme %ds sonra · tıkla → şimdi yenile";
 
